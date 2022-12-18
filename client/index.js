@@ -4,9 +4,15 @@ import { Provider } from 'react-redux';
 import { Router } from 'react-router-dom';
 // import history from './history';
 // import store from './store';
+import { BrowserRouter } from 'react-router-dom';
 import App from './App';
+import history from './history';
 
 const container = document.getElementById('app');
 
 const root = createRoot(container);
-root.render(<App tab="home" />);
+root.render(
+  <BrowserRouter history={history}>
+    <App tab="home" />
+  </BrowserRouter>
+);

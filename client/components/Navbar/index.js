@@ -32,7 +32,6 @@ const NavContainer = styled.div`
   display: flex;
   height: 64px;
   justify-content: space-evenly;
-
   position: fixed;
   top: 0px;
   width: 100%;

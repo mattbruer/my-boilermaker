@@ -1,6 +1,9 @@
 import React from 'react';
 import { PShadow, CenteredDiv } from './styledDivs';
+import { useSelector } from 'react-redux';
+
 const Home = () => {
+  const state = useSelector((state) => state);
   return (
     <CenteredDiv
       style={{
@@ -13,7 +16,7 @@ const Home = () => {
         backgroundColor: 'red',
       }}
     >
-      <PShadow>Home</PShadow>
+      <PShadow>{JSON.stringify(state.auth.id)}</PShadow>
     </CenteredDiv>
   );
 };

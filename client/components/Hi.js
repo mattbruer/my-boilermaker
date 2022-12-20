@@ -1,7 +1,10 @@
 import React from 'react';
+import { useSelector } from 'react-redux';
 
 const Hi = () => {
-  return <div style={{ marginTop: '65px' }}>Hi</div>;
+  const state = useSelector((state) => state);
+
+  return <div style={{ marginTop: '65px' }}>{JSON.stringify(state)}</div>;
 };
 
 export default Hi;

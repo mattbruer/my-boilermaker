@@ -12,8 +12,8 @@ app.use(morgan('dev'));
 app.use(express.json());
 
 // auth and api routes
-// app.use('/auth', require('./auth'));
-// app.use('/api', require('./api'));
+app.use('/auth', require('./auth'));
+app.use('/api', require('./api'));
 
 app.get('/', (req, res) =>
   res.sendFile(path.join(__dirname, '..', 'public/index.html'))
@@ -45,5 +45,3 @@ app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(err.status || 500).send(err.message || 'Internal server error.');
 });
-
-app.listen(PORT, () => console.log(`Mixing it up on port ${PORT}`));

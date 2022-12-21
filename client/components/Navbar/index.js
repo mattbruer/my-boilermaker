@@ -26,7 +26,7 @@ const Navbar = () => {
         <>
           <CenteredDiv>
             <a href="#" onClick={handleClick}>
-              Logout
+              <PShadow>Logout</PShadow>
             </a>
           </CenteredDiv>
         </>

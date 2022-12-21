@@ -38,6 +38,9 @@
     "webpack-cli": "^5.0.1"
   },
   "dependencies": {
+    "@emotion/react": "^11.10.5",
+    "@emotion/styled": "^11.10.5",
+    "@mui/material": "^5.11.1",
     "@reduxjs/toolkit": "^1.9.1",
     "axios": "^1.2.1",
     "bcrypt": "^5.1.0",

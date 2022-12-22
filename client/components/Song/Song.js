@@ -65,12 +65,5 @@ export default Song;
 const Container = styled.div`
   margin-top: 64px;
   height: calc(100vh - 106px);
-  background-color: #204368;
-  background: rgb(255, 255, 255);
-  background: radial-gradient(
-    circle,
-    rgba(255, 255, 255, 1) 12%,
-    rgba(253, 29, 29, 1) 56%,
-    rgba(217, 214, 21, 1) 99%
-  );
+  background-color: #0a98f7;
 `;

@@ -62,6 +62,7 @@ const ControlBar = () => {
             <Button style={buttonStyle} variant="outlined">
               <PlayArrowOutlined />
             </Button>
+
             <CenteredDiv
               style={{
                 width: '40vw',
@@ -89,7 +90,7 @@ const Container = styled.div`
   bottom: 0;
   height: 55px;
   width: 100%;
-  background-color: #3b8689;
+  background-color: #29c7d8;
   user-select: none;
   box-shadow: 0px -5px 15px black;
 `;
@@ -97,5 +98,5 @@ const Container = styled.div`
 const buttonStyle = {
   backgroundColor: 'white',
   boxShadow: '5px -2px 10px black',
-  height: '45px',
+  height: '40px',
 };

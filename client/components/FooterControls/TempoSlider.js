@@ -4,7 +4,7 @@ import Slider from '@mui/material/Slider';
 const TempoSlider = () => {
   return (
     <Slider
-      style={{ color: 'white' }}
+      style={{ minWidth: '50%' }}
       defaultValue={50}
       aria-label="Default"
       valueLabelDisplay="auto"

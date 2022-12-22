@@ -29,6 +29,17 @@ export const loadUserSongs = createAsyncThunk(
 
 const initialState = {
   allSongs: [],
+  measures: [[], []],
+  selectedSong: 0,
+  selectedMeasure: 0,
+  position: [0, 0, 0],
+  currentLine: 0,
+  currentMeasure: 0,
+  currentMeasPos: 0,
+  lines: [[], []],
+  measuresPerLine: 4,
+  timeSig: [2, 2],
+  editMode: false,
 };
 
 const songSlice = createSlice({
@@ -41,8 +52,23 @@ const songSlice = createSlice({
     addSong: (state, action) => {
       state.allSongs.push(action.payload);
     },
+    toggleEditMode: (state, action) => {
+      state.editMode = action.payload;
+    },
+    editTitle: (state, action) => {
+      const song = state.allSongs.find(
+        (song) => song.id === state.selectedSong
+      );
+      song.title = action.payload;
+    },
+    selectSong: (state, action) => {
+      state.selectedSong = action.payload;
+      const song = state.allSongs.find((song) => song.id == action.payload);
+      state.measures = JSON.parse(song.measures);
+    },
   },
 });
 
-export const { setAllSongs, addSong } = songSlice.actions;
+export const { setAllSongs, addSong, toggleEditMode, editTitle, selectSong } =
+  songSlice.actions;
 export default songSlice.reducer;

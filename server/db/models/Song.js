@@ -10,6 +10,10 @@ const Song = db.define('song', {
       notEmpty: true,
     },
   },
+  measures: {
+    type: Sequelize.STRING,
+    defaultValue: '[["C","G"]]',
+  },
   timeSignature: {
     type: Sequelize.ARRAY(Sequelize.INTEGER),
   },

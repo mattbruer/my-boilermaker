@@ -8,7 +8,7 @@ import FormControl from '@mui/material/FormControl';
 import Select, { SelectChangeEvent } from '@mui/material/Select';
 import { useSelector, useDispatch } from 'react-redux';
 import { newSong } from '../../store/songSlice';
-import Button from './Button';
+import Button from '@mui/material/Button';
 
 const keys = ['C', 'G', 'D', 'A', 'E', 'B', 'F#', 'C#', 'Db', 'Ab', 'Eb', 'Bb'];
 
@@ -39,6 +39,7 @@ const NewSongModal = ({ setOpenModal }) => {
         </CenteredDiv>
 
         <Button
+          variant="outlined"
           onClick={() => {
             handleSubmit();
             setOpenModal(false);

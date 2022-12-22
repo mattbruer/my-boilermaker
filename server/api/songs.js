@@ -9,6 +9,7 @@ module.exports = router;
 router.get('/', requireToken, async (req, res, next) => {
   try {
     const songs = await Song.findAll({ where: { userId: req.user.id } });
+
     res.json(songs);
   } catch (error) {
     next(error);

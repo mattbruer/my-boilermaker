@@ -1,10 +1,14 @@
 import React, { useState } from 'react';
 import { PShadow, CenteredDiv } from './styledDivs';
-import Button from './UI/Button';
+import Button from '@mui/material/Button';
 import { useSelector } from 'react-redux';
 import NewSongModal from './UI/NewSongModal';
+import { Link } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
+import { selectSong } from '../store/songSlice';
 
 const Home = () => {
+  const dispatch = useDispatch();
   const [openModal, setOpenModal] = useState(false);
 
   const state = useSelector((state) => state);
@@ -23,9 +27,13 @@ const Home = () => {
       >
         <PShadow>{state.auth.email} Songs</PShadow>
         {state.songs.allSongs.map((s) => (
-          <PShadow key={s.id}>{s.title}</PShadow>
+          <Link key={s.id} to={`/song/${s.id}`}>
+            <PShadow>{s.title}</PShadow>
+          </Link>
         ))}
-        <Button onClick={() => setOpenModal(true)}>New Song</Button>
+        <Button variant="outlined" onClick={() => setOpenModal(true)}>
+          New Song
+        </Button>
       </CenteredDiv>
     </CenteredDiv>
   );

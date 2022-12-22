@@ -5,6 +5,7 @@ import { me } from './store/authSlice';
 import { Login, Signup } from './components/AuthForm';
 import Hi from './components/Hi';
 import Home from './components/Home';
+import Song from './components/Song/Song';
 
 const Routes = () => {
   const dispatch = useDispatch();
@@ -19,21 +20,15 @@ const Routes = () => {
 
   return (
     <AppRoutes>
-      {console.log(isLoggedIn)}
-      {isLoggedIn ? (
-        <>
-          <Route path="/hi" element={<Hi />} />
-          <Route path="/home" element={<Home />} />
-          <Route path="*" element={<Navigate to="/home" replace />} />
-        </>
-      ) : (
-        <>
-          <Route path="/" element={<Login />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/signup" element={<Signup />} />
-          <Route path="*" element={<Navigate to="/login" replace />} />
-        </>
-      )}
+      <>
+        <Route path="/hi" element={<Hi />} />
+        <Route path="/home" element={<Home />} />
+        <Route path="/song/:songId" element={<Song />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/signup" element={<Signup />} />
+        <Route path="/" element={<Login />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </>
     </AppRoutes>
   );
 };

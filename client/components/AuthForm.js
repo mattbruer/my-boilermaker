@@ -1,12 +1,19 @@
-import React from 'react';
-import { connect } from 'react-redux';
+import React, { useEffect } from 'react';
+import { connect, useSelector } from 'react-redux';
 import { authenticate } from '../store';
+import { useNavigate } from 'react-router-dom';
 
 /**
  * COMPONENT
  */
 const AuthForm = (props) => {
+  const navigate = useNavigate();
   const { name, displayName, handleSubmit, error } = props;
+  const auth = useSelector((state) => state.auth);
+
+  useEffect(() => {
+    auth.id && navigate('/home');
+  }, [auth]);
 
   return (
     <div

@@ -57,6 +57,7 @@ const NavContainer = styled.div`
   position: fixed;
   top: 0px;
   width: 100%;
-  box-shadow: 0px 2px 2px black;
+  box-shadow: 0px 5px 15px black;
   border-bottom: 1px groove grey;
+  background-color: #9a9795;
 `;

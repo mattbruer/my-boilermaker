@@ -1,13 +1,13 @@
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import axios from 'axios';
-import history from '../history';
-import { sendToken } from './helperFunctions';
+import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import axios from "axios";
+import history from "../history";
+import { sendToken } from "./helperFunctions";
 
 export const newSong = createAsyncThunk(
-  'song/newSong',
+  "song/newSong",
   async (formValues, thunkAPI) => {
     try {
-      const { data } = await axios.post('/api/songs', formValues, sendToken());
+      const { data } = await axios.post("/api/songs", formValues, sendToken());
       thunkAPI.dispatch(addSong(data));
     } catch (error) {
       console.log(error);
@@ -16,13 +16,16 @@ export const newSong = createAsyncThunk(
 );
 
 export const loadUserSongs = createAsyncThunk(
-  'song/loadUserSongs',
+  "song/loadUserSongs",
   async (_, thunkAPI) => {
     try {
-      const { data } = await axios.get('/api/songs', sendToken());
+      const { data } = await axios.get("/api/songs", sendToken());
+      data.forEach((song) => {
+        song.measures = JSON.parse(song.measures);
+      });
       thunkAPI.dispatch(setAllSongs(data));
     } catch (error) {
-      console.log(errpr);
+      console.log(error);
     }
   }
 );
@@ -43,7 +46,7 @@ const initialState = {
 };
 
 const songSlice = createSlice({
-  name: 'song',
+  name: "song",
   initialState,
   reducers: {
     setAllSongs: (state, action) => {
@@ -61,14 +64,27 @@ const songSlice = createSlice({
       );
       song.title = action.payload;
     },
+    editChord: (state, action) => {
+      const song = state.allSongs.find(
+        (song) => song.id === state.selectedSong
+      );
+      song.measures[action.payload.measureNumber][action.payload.postion] +=
+        action.payload.value;
+    },
     selectSong: (state, action) => {
       state.selectedSong = action.payload;
-      const song = state.allSongs.find((song) => song.id == action.payload);
-      state.measures = JSON.parse(song.measures);
+      const song = state.allSongs.find((song) => song.id == state.selectedSong);
+      state.measures = song.measures;
     },
   },
 });
 
-export const { setAllSongs, addSong, toggleEditMode, editTitle, selectSong } =
-  songSlice.actions;
+export const {
+  setAllSongs,
+  addSong,
+  toggleEditMode,
+  editTitle,
+  selectSong,
+  editChord,
+} = songSlice.actions;
 export default songSlice.reducer;

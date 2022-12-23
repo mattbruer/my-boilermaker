@@ -1,12 +1,12 @@
-import React, { useEffect } from 'react';
-import styled from 'styled-components';
-import { useDispatch, useSelector } from 'react-redux';
-import { useParams } from 'react-router-dom';
-import { editTitle, selectSong } from '../../store/songSlice';
-import { CenteredDiv, PShadow } from '../styledDivs';
-import Measure from './Measure';
-import Chart from './Chart';
-import ControlBar from '../FooterControls/ControlBar';
+import React, { useEffect } from "react";
+import styled from "styled-components";
+import { useDispatch, useSelector } from "react-redux";
+import { useParams } from "react-router-dom";
+import { editTitle, selectSong } from "../../store/songSlice";
+import { CenteredDiv, PShadow } from "../styledDivs";
+import Measure from "./Measure";
+import Chart from "./Chart";
+import ControlBar from "../FooterControls/ControlBar";
 
 const Song = () => {
   const dispatch = useDispatch();
@@ -23,20 +23,20 @@ const Song = () => {
 
   return (
     <Container>
-      <CenteredDiv style={{ flexDirection: 'column' }}>
+      <CenteredDiv style={{ flexDirection: "column" }}>
         {editMode ? (
           <input
             style={{
-              marginTop: '20px',
-              marginBottom: '20px',
-              fontSize: '20px',
-              height: '40px',
+              marginTop: "20px",
+              marginBottom: "20px",
+              fontSize: "20px",
+              height: "40px",
             }}
             value={song.title}
             onChange={(e) => dispatch(editTitle(e.target.value))}
           />
         ) : (
-          <PShadow style={{ marginTop: '20px', marginBottom: '20px' }}>
+          <PShadow style={{ marginTop: "20px", marginBottom: "20px" }}>
             {song && song.title}
           </PShadow>
         )}

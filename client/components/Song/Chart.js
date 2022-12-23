@@ -1,9 +1,9 @@
-import React, { useLayoutEffect, useState, useRef } from 'react';
-import styled from 'styled-components';
-import { useDispatch, useSelector } from 'react-redux';
-import useResize from 'use-resize';
-import LandscapeChart from './LandscapeChart';
-import PortraitChart from './PortraitChart';
+import React, { useLayoutEffect, useState, useRef } from "react";
+import styled from "styled-components";
+import { useDispatch, useSelector } from "react-redux";
+import useResize from "use-resize";
+import LandscapeChart from "./LandscapeChart";
+import PortraitChart from "./PortraitChart";
 
 const Chart = () => {
   const size = useResize();
@@ -14,7 +14,7 @@ const Chart = () => {
       {ref.current?.clientWidth > ref.current?.clientHeight ? (
         <LandscapeChart />
       ) : (
-        <PortraitChart />
+        <LandscapeChart />
       )}
     </Container>
   );
@@ -26,7 +26,6 @@ const Container = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
-  min-height: calc(100vh - 300px);
-
+  height: calc(100vh - 300px);
   width: 100%;
 `;

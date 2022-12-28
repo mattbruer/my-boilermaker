@@ -3,11 +3,12 @@ import { configureStore } from '@reduxjs/toolkit';
 
 import auth from './authSlice';
 import songs from './songSlice';
+import mixer from './mixerSlice';
 
 const store = configureStore({
-  reducer: { auth, songs },
-  middleware: (getDefaultMiddleware) =>
-    getDefaultMiddleware().concat(createLogger({ collapsed: true })),
+  reducer: { auth, songs, mixer },
+  // middleware: (getDefaultMiddleware) =>
+  //   getDefaultMiddleware().concat(createLogger({ collapsed: true })),
 });
 
 export default store;

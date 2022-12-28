@@ -1,8 +1,8 @@
 import React from 'react';
 import styled from 'styled-components';
 
-const Modal = ({ children }) => {
-  return <Container>{children}</Container>;
+const Modal = ({ children, style }) => {
+  return <Container style={style}>{children}</Container>;
 };
 
 export default Modal;

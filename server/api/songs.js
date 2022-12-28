@@ -24,3 +24,15 @@ router.post('/', requireToken, async (req, res, next) => {
     next(error);
   }
 });
+
+router.put('/', requireToken, async (req, res, next) => {
+  try {
+    req.body.measures = JSON.stringify(req.body.measures);
+    const song = await Song.update(req.body, {
+      where: { id: req.body.id, userId: req.user.id },
+    });
+    res.json(song);
+  } catch (error) {
+    next(error);
+  }
+});

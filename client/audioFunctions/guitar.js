@@ -1,3 +1,5 @@
+const [root, third, fifth, seventh] = ['root', 'third', 'fifth', 'seventh'];
+
 const openVoicings = {
   A: [0, 0, 2, 2, 2, 0],
   A7: [0, 0, 2, 0, 2, 0],
@@ -12,13 +14,31 @@ const openVoicings = {
   E7: [0, 2, 0, 1, 0, 0],
   Em: [0, 2, 2, 0, 0, 0],
   Em7: [0, 2, 0, 0, 0, 0],
-
   G: [3, 2, 0, 0, 3, 3],
   G7: [3, 2, 0, 0, 0, 1],
 };
 
+const openVoicingChordTones = {
+  A: [fifth, root, fifth, root, third, fifth],
+  A7: [fifth, root, fifth, seventh, third, fifth],
+  Am: [fifth, root, fifth, root, third, fifth],
+  Am7: [fifth, root, fifth, seventh, third, fifth],
+  B7: [null, root, third, seventh, root, fifth],
+  C: [fifth, root, third, fifth, root, third],
+  C7: [third, root, third, seventh, root, third],
+  D: [null, fifth, root, fifth, root, third],
+  D7: [null, fifth, root, fifth, seventh, third],
+  E: [root, fifth, root, third, fifth, root],
+  E7: [root, fifth, seventh, third, fifth, root],
+  Em: [root, fifth, root, third, fifth, root],
+  Em7: [root, fifth, seventh, third, fifth, root],
+  G: [root, third, fifth, root, fifth, root],
+  G7: [root, third, fifth, root, third, seventh],
+};
+
 const closedVoicings = {
   F: [1, 3, 3, 2, 1, 1],
+  F7: [1, 3, 1, 2, 1, 1],
   Fm: [1, 3, 3, 1, 1, 1],
   Fm7: [1, 3, 1, 1, 1, 1],
   Bb: [1, 1, 3, 3, 3, 1],
@@ -27,13 +47,62 @@ const closedVoicings = {
   Bbm7: [1, 1, 3, 1, 2, 1],
 };
 
-function fretsToNotes(voicing) {
-  const result = [];
+const closedVoicingChordTones = {
+  F: [root, fifth, root, third, fifth, root],
+  F7: [root, fifth, seventh, third, fifth, root],
+  Fm: [root, fifth, root, third, fifth, root],
+  Fm7: [root, fifth, seventh, third, fifth, root],
+  Bb: [fifth, root, fifth, root, third, fifth],
+  Bb7: [fifth, root, fifth, seventh, third, fifth],
+  Bbm: [fifth, root, fifth, root, third, fifth],
+  Bbm7: [fifth, root, fifth, seventh, third, fifth],
+};
 
-  for (let i = 0; i < 6; i++) {
-    result.push(noteMap[i][voicing[i]]);
+function getRoot(chord) {
+  return chord[1] === 'b' || chord[1] === '#' ? chord[0] + chord[1] : chord[0];
+}
+
+function getQuality(chord) {
+  return chord.split(getRoot(chord))[1];
+}
+
+function fretsToNotes(voicing) {
+  return voicing.map((fret, i) => noteMap[i][fret]);
+}
+
+function getVoicing(chord) {
+  if (openVoicings[chord]) {
+    return openVoicings[chord];
   }
-  return result;
+  if (closedVoicings[chord]) {
+    return closedVoicings[chord];
+  }
+}
+
+function rootString(chord) {
+  return closedVoicingChordTones[chord]?.indexOf(root);
+}
+
+function findClosedVoicing(chord) {
+  const root = getRoot(chord);
+  const choices = Object.keys(closedVoicings).filter(
+    (ch) => getQuality(chord) === getQuality(ch)
+  );
+  const strings = choices.map((c) => rootString(c));
+
+  const lowestRoot = strings.map((s) => {
+    let res;
+    for (let i = 0; i < 10; i++) {
+      if (noteMap[s][i].includes(root)) {
+        res = i;
+      }
+    }
+    return res;
+  });
+  console.log(lowestRoot.indexOf(Math.min.apply(null, lowestRoot)));
+
+  // const choice = Math.min(lowestRoot);
+  return strings;
 }
 
 const tuning = ['E', 'A', 'D', 'G', 'B', 'e'];
@@ -125,4 +194,4 @@ const noteMap = [
   ],
 ];
 
-console.log(fretsToNotes(openVoicings['D']));
+console.log(findClosedVoicing('F#7'));

@@ -1,21 +1,22 @@
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import axios from 'axios';
-import history from '../history';
-import { sendToken } from './helperFunctions';
-import { play } from '../audioFunctions/play';
+import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import axios from "axios";
+import history from "../history";
+import { sendToken } from "./helperFunctions";
+import { play } from "../audioFunctions/play";
 
 let interval;
 let pos;
 
-export const playSong = createAsyncThunk('song/playSong', (_, thunkAPI) => {
-  interval = play();
-  pos = setInterval(() => {
-    thunkAPI.dispatch(advancePosition());
-  }, 1000);
+export const playSong = createAsyncThunk("song/playSong", (_, thunkAPI) => {
+  play();
+  // interval = play();
+  // pos = setInterval(() => {
+  //   thunkAPI.dispatch(advancePosition());
+  // }, 1000);
   thunkAPI.dispatch(togglePlay(true));
 });
 
-export const stopSong = createAsyncThunk('song/stopSong', (_, thunkAPI) => {
+export const stopSong = createAsyncThunk("song/stopSong", (_, thunkAPI) => {
   clearInterval(pos);
   clearInterval(interval);
   thunkAPI.dispatch(resetPosition());
@@ -23,10 +24,10 @@ export const stopSong = createAsyncThunk('song/stopSong', (_, thunkAPI) => {
 });
 
 export const saveChanges = createAsyncThunk(
-  'song/saveChanges',
+  "song/saveChanges",
   async (newSong, thunkAPI) => {
     try {
-      const { data } = await axios.put('/api/songs', newSong, sendToken());
+      const { data } = await axios.put("/api/songs", newSong, sendToken());
       thunkAPI.dispatch(toggleEditMode(!toggleEditMode));
     } catch (error) {
       console.log(error);
@@ -35,10 +36,10 @@ export const saveChanges = createAsyncThunk(
 );
 
 export const newSong = createAsyncThunk(
-  'song/newSong',
+  "song/newSong",
   async (formValues, thunkAPI) => {
     try {
-      const { data } = await axios.post('/api/songs', formValues, sendToken());
+      const { data } = await axios.post("/api/songs", formValues, sendToken());
       data.measures = JSON.parse(data.measures);
       thunkAPI.dispatch(addSong(data));
     } catch (error) {
@@ -48,10 +49,10 @@ export const newSong = createAsyncThunk(
 );
 
 export const loadUserSongs = createAsyncThunk(
-  'song/loadUserSongs',
+  "song/loadUserSongs",
   async (_, thunkAPI) => {
     try {
-      const { data } = await axios.get('/api/songs', sendToken());
+      const { data } = await axios.get("/api/songs", sendToken());
       data.forEach((song) => {
         song.measures = JSON.parse(song.measures);
       });
@@ -77,10 +78,11 @@ const initialState = {
   editMode: false,
   tempo: 0,
   isPlaying: false,
+  validChords: false,
 };
 
 const songSlice = createSlice({
-  name: 'song',
+  name: "song",
   initialState,
   reducers: {
     setAllSongs: (state, action) => {

@@ -1,8 +1,8 @@
-import React, { useEffect } from 'react';
-import styled, { keyframes } from 'styled-components';
-import { useSelector, useDispatch } from 'react-redux';
-import Measure from './Measure';
-import store from '../../store';
+import React, { useEffect } from "react";
+import styled, { keyframes } from "styled-components";
+import { useSelector, useDispatch } from "react-redux";
+import Measure from "./Measure";
+import store from "../../store";
 
 const LandscapeChart = () => {
   const { measures } = useSelector((state) => state.songs);
@@ -12,9 +12,9 @@ const LandscapeChart = () => {
   return (
     <div
       style={{
-        width: '100%',
-        padding: '50px 0px 50px 0px',
-        overflow: isPlaying ? 'hidden' : 'scroll',
+        width: "100%",
+        padding: "50px 0px 50px 0px",
+        overflow: isPlaying ? "hidden" : "scroll",
       }}
     >
       {/* <div
@@ -78,17 +78,17 @@ const Container = styled.div`
   display: flex;
   position: relative;
   right: ${(props) => {
-    return 192 * props.position + 'px';
+    return 192 * props.position + "px";
   }};
   align-items: center;
   box-shadow: 0px 0px 15px black;
-  width: ${(props) => (props.isPlaying ? '10000px' : '100%')};
+  width: ${(props) => (props.isPlaying ? "10000px" : "100%")};
   min-height: 150px;
   background-color: white;
-  overflow-x: ${(props) => (props.isPlaying ? 'hidden' : 'scroll')};
+  overflow-x: ${(props) => (props.isPlaying ? "hidden" : "scroll")};
   padding: 20px;
   animation-name: ${(props) => breatheAnimation(props.len)};
-  animation-duration: ${(props) => (props.isPlaying ? '8s' : '0s')};
+  animation-duration: ${(props) => (props.isPlaying ? "8s" : "0s")};
   animation-timing-function: linear;
   animation-iteration-count: infinite;
 `;

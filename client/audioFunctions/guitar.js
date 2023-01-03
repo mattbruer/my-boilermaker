@@ -1,14 +1,24 @@
-const [root, third, fifth, seventh] = ['root', 'third', 'fifth', 'seventh'];
+import { Howl } from "howler";
+const guitarNotes = {};
+
+const getProgression = () =>
+  store
+    .getState()
+    .songs.allSongs.filter(
+      (song) => song.id === store.getState().songs.selectedSong
+    )[0].measures;
+
+const [root, third, fifth, seventh] = ["root", "third", "fifth", "seventh"];
 
 const openVoicings = {
   A: [0, 0, 2, 2, 2, 0],
   A7: [0, 0, 2, 0, 2, 0],
   Am: [0, 0, 2, 2, 1, 0],
   Am7: [0, 0, 2, 0, 1, 0],
-  B7: [null, 2, 1, 2, 0, 2],
+  B7: [2, 2, 1, 2, 0, 2],
   C: [3, 3, 2, 0, 1, 0],
   C7: [0, 3, 2, 3, 1, 0],
-  D: [null, 0, 0, 2, 3, 2],
+  D: [2, 0, 0, 2, 3, 2],
   D7: [null, 0, 0, 2, 1, 2],
   E: [0, 2, 2, 1, 0, 0],
   E7: [0, 2, 0, 1, 0, 0],
@@ -59,10 +69,11 @@ const closedVoicingChordTones = {
 };
 
 function getRoot(chord) {
-  return chord[1] === 'b' || chord[1] === '#' ? chord[0] + chord[1] : chord[0];
+  return chord[1] === "b" || chord[1] === "#" ? chord[0] + chord[1] : chord[0];
 }
 
 function getQuality(chord) {
+  console.log(chord);
   return chord.split(getRoot(chord))[1];
 }
 
@@ -77,121 +88,234 @@ function getVoicing(chord) {
   if (closedVoicings[chord]) {
     return closedVoicings[chord];
   }
+  return buildClosedVoicing(chord);
 }
 
 function rootString(chord) {
   return closedVoicingChordTones[chord]?.indexOf(root);
 }
 
-function findClosedVoicing(chord) {
+function buildClosedVoicing(chord) {
   const root = getRoot(chord);
-  const choices = Object.keys(closedVoicings).filter(
-    (ch) => getQuality(chord) === getQuality(ch)
-  );
-  const strings = choices.map((c) => rootString(c));
-
-  const lowestRoot = strings.map((s) => {
-    let res;
-    for (let i = 0; i < 10; i++) {
-      if (noteMap[s][i].includes(root)) {
-        res = i;
+  const qual = getQuality(chord);
+  let result;
+  let i = 0;
+  try {
+    while (!result && i < 10) {
+      if (noteMap[0][i].includes(root)) {
+        result = closedVoicings["F" + qual].map((fret) => fret + (i - 1));
+        closedVoicings[chord] = result;
+        closedVoicingChordTones[chord] = closedVoicingChordTones["F" + qual];
       }
+      if (noteMap[1][i].includes(root)) {
+        result = closedVoicings["Bb" + qual].map((fret) => fret + (i - 1));
+        closedVoicings[chord] = result;
+        closedVoicingChordTones[chord] = closedVoicingChordTones["Bb" + qual];
+      }
+      i++;
     }
-    return res;
-  });
-  console.log(lowestRoot.indexOf(Math.min.apply(null, lowestRoot)));
-
-  // const choice = Math.min(lowestRoot);
-  return strings;
+    return result;
+  } catch (error) {
+    return "that chord is not supported";
+  }
 }
 
-const tuning = ['E', 'A', 'D', 'G', 'B', 'e'];
+function transposeToCapo(chord, capo) {
+  const root = getRoot(chord);
+  const qual = getQuality(chord);
+  let newRoot = chromFlat.includes(root)
+    ? chromFlat[chromFlat.indexOf(root) + capo]
+    : chromSharp[chromSharp.indexOf(root) + capo];
+
+  return getVoicing(newRoot + qual).map((fret) => fret + capo);
+}
+
+const tuning = ["E", "A", "D", "G", "B", "e"];
+
+export function validateChords(progression) {
+  // const progression = getProgression();
+  let flatProg = [];
+  progression.forEach((measure) => {
+    flatProg.push(...measure);
+  });
+
+  return flatProg.every((chord, i) => {
+    const root = getRoot(chord);
+    const qual = getQuality(chord);
+
+    if (chord === "") {
+      return true;
+    }
+    if (!(chromFlat.includes(root) || chromSharp.includes(root))) {
+      window.alert(
+        `Sorry, ${chord} (measure ${i + 1}) is not supported in this app.`
+      );
+      return false;
+    }
+
+    if (!["", "min", "7", "min7"].includes(qual)) {
+      window.alert(
+        `Sorry, ${chord} (measure ${i + 1}) is not supported in this app.`
+      );
+      return false;
+    }
+    getVoicing(chord).forEach((fret, string) => {
+      const note = `${tuning[string]}${fret}`;
+      if (!guitarNotes[note] && fret !== null) {
+        guitarNotes[note] = new Howl({
+          src: [
+            `https://mvbguitarsamples.s3.us-east-2.amazonaws.com/guitar/${note}.mp3`,
+          ],
+        });
+      }
+    });
+    return true;
+  });
+}
+
+export function guitarPlay(position) {
+  guitarNotes["E3"].play();
+  setTimeout(() => {
+    guitarNotes["B3"].play();
+  }, 1000);
+}
+const chromFlat = [
+  "G",
+  "Gb",
+  "F",
+  "E",
+  "Eb",
+  "D",
+  "Db",
+  "C",
+  "B",
+  "Bb",
+  "A",
+  "Ab",
+  "G",
+  "Gb",
+  "F",
+  "E",
+  "Eb",
+  "D",
+  "Db",
+  "C",
+  "B",
+  "Bb",
+  "A",
+  "Ab",
+];
+
+const chromSharp = [
+  "G#",
+  "G",
+  "F#",
+  "F",
+  "E",
+  "D#",
+  "D",
+  "C#",
+  "C",
+  "B",
+  "A#",
+  "A",
+  "G#",
+  "G",
+  "F#",
+  "F",
+  "E",
+  "D#",
+  "D",
+  "C#",
+  "C",
+  "B",
+  "A#",
+  "A",
+];
 
 const noteMap = [
   [
-    ['E'],
-    ['F'],
-    ['F#', 'Gb'],
-    ['G'],
-    ['G#', 'Ab'],
-    ['A'],
-    ['A#', 'Bb'],
-    ['B'],
-    ['C'],
-    ['C#', 'Db'],
-    ['D'],
-    ['D#', 'Eb'],
+    ["E"],
+    ["F"],
+    ["F#", "Gb"],
+    ["G"],
+    ["G#", "Ab"],
+    ["A"],
+    ["A#", "Bb"],
+    ["B"],
+    ["C"],
+    ["C#", "Db"],
+    ["D"],
+    ["D#", "Eb"],
   ],
   [
-    ['A'],
-    ['A#', 'Bb'],
-    ['B'],
-    ['C'],
-    ['C#', 'Db'],
-    ['D'],
-    ['D#', 'Eb'],
-    ['E'],
-    ['F'],
-    ['F#', 'Gb'],
-    ['G'],
-    ['G#', 'Ab'],
+    ["A"],
+    ["A#", "Bb"],
+    ["B"],
+    ["C"],
+    ["C#", "Db"],
+    ["D"],
+    ["D#", "Eb"],
+    ["E"],
+    ["F"],
+    ["F#", "Gb"],
+    ["G"],
+    ["G#", "Ab"],
   ],
   [
-    ['D'],
-    ['D#', 'Eb'],
-    ['E'],
-    ['F'],
-    ['F#', 'Gb'],
-    ['G'],
-    ['G#', 'Ab'],
-    ['A'],
-    ['A#', 'Bb'],
-    ['B'],
-    ['C'],
-    ['C#', 'Db'],
+    ["D"],
+    ["D#", "Eb"],
+    ["E"],
+    ["F"],
+    ["F#", "Gb"],
+    ["G"],
+    ["G#", "Ab"],
+    ["A"],
+    ["A#", "Bb"],
+    ["B"],
+    ["C"],
+    ["C#", "Db"],
   ],
   [
-    ['G'],
-    ['G#', 'Ab'],
-    ['A'],
-    ['A#', 'Bb'],
-    ['B'],
-    ['C'],
-    ['C#', 'Db'],
-    ['D'],
-    ['D#', 'Eb'],
-    ['E'],
-    ['F'],
-    ['F#', 'Gb'],
+    ["G"],
+    ["G#", "Ab"],
+    ["A"],
+    ["A#", "Bb"],
+    ["B"],
+    ["C"],
+    ["C#", "Db"],
+    ["D"],
+    ["D#", "Eb"],
+    ["E"],
+    ["F"],
+    ["F#", "Gb"],
   ],
   [
-    ['B'],
-    ['C'],
-    ['C#', 'Db'],
-    ['D'],
-    ['D#', 'Eb'],
-    ['E'],
-    ['F'],
-    ['F#', 'Gb'],
-    ['G'],
-    ['G#', 'Ab'],
-    ['A'],
-    ['A#', 'Bb'],
+    ["B"],
+    ["C"],
+    ["C#", "Db"],
+    ["D"],
+    ["D#", "Eb"],
+    ["E"],
+    ["F"],
+    ["F#", "Gb"],
+    ["G"],
+    ["G#", "Ab"],
+    ["A"],
+    ["A#", "Bb"],
   ],
   [
-    ['E'],
-    ['F'],
-    ['F#', 'Gb'],
-    ['G'],
-    ['G#', 'Ab'],
-    ['A'],
-    ['A#', 'Bb'],
-    ['B'],
-    ['C'],
-    ['C#', 'Db'],
-    ['D'],
-    ['D#', 'Eb'],
+    ["E"],
+    ["F"],
+    ["F#", "Gb"],
+    ["G"],
+    ["G#", "Ab"],
+    ["A"],
+    ["A#", "Bb"],
+    ["B"],
+    ["C"],
+    ["C#", "Db"],
+    ["D"],
+    ["D#", "Eb"],
   ],
 ];
-
-console.log(findClosedVoicing('F#7'));

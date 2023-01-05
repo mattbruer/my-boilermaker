@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import styled from 'styled-components';
 import { CenteredDiv, PShadow } from '../styledDivs';
 import {
@@ -33,6 +33,11 @@ const ControlBar = () => {
   const { playDisabled } = useSelector((state) => state.ui);
   const { toggleMixerModal } = useSelector((state) => state.mixer);
   const [song] = allSongs.filter((s) => s.id === selectedSong);
+
+  // useEffect(() => {
+  //   guitarCheck();
+  // }, []);
+
   return (
     <Container>
       <CenteredDiv style={{ justifyContent: 'space-around' }}>

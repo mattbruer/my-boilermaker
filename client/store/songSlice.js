@@ -64,7 +64,7 @@ export const loadUserSongs = createAsyncThunk(
 const initialState = {
   allSongs: [],
   measures: [[], []],
-  selectedSong: 0,
+  selectedSong: null,
   selectedMeasure: 0,
   position: 0,
   loop: null,

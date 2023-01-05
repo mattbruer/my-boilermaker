@@ -26,7 +26,7 @@ export function play() {
 
   setTimeout(() => {
     store.getState().songs.isPlaying && play();
-  }, 1000);
+  }, 500);
 }
 // const sound = new Howl({
 //   src: ["https://mvbguitarsamples.s3.us-east-2.amazonaws.com/guitar/E5.mp3"],

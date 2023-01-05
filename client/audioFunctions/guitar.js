@@ -6,6 +6,7 @@ import { disablePlay } from '../store/uiSlice';
 //memoization...sorta?
 const guitarNotes = {};
 const statusObj = {};
+let playrollChordTones;
 let playroll;
 let flattenedSong;
 
@@ -32,20 +33,57 @@ function loadNotes(playroll) {
       }
     });
   });
-  console.log(guitarNotes);
 }
 
 function applyCapo(voicing, capo) {
   return voicing.map((note) => note + capo);
 }
+
 export function buildGuitarPlayroll(song, capo) {
   flattenedSong = song.map((chord) => transposeToCapo(chord, capo));
   playroll = flattenedSong.map((chord) => applyCapo(getVoicing(chord), capo));
 
+  playrollChordTones = flattenedSong.map(
+    (chord) => openVoicingChordTones[chord] || closedVoicingChordTones[chord]
+  );
   loadNotes(playroll);
+
+  let spreadCTs = [];
+  playrollChordTones.forEach((ch) => {
+    spreadCTs.push(ch.slice(0, 3));
+    spreadCTs.push(ch.slice(3));
+  });
+  playrollChordTones = spreadCTs;
+
+  let spread = [];
+  playroll = playroll.map((ch) => ch.map((note, i) => tuning[i] + note));
+  playroll.forEach((ch) => {
+    spread.push(ch.slice(0, 3));
+    spread.push(ch.slice(3));
+  });
+  playroll = spread;
 }
 
-export function guitarPlay(flattenedSong, prevBassNote = null) {}
+let prevBassNote;
+export function guitarPlay() {
+  let pos = store.getState().songs.position;
+  if (pos % 2 === 0) {
+    if (pos === 0) {
+      let note = playroll[0][playrollChordTones[0].indexOf(root)];
+      guitarNotes[note].play();
+      prevBassNote = note;
+    } else {
+      //look for half steps
+      let choices = playroll[pos].filter((note) => note !== prevBassNote);
+      let len = choices.length;
+      let note = choices[Math.floor(Math.random() * len)];
+      guitarNotes[note].play();
+      prevBassNote = note;
+    }
+  }
+  pos % 2 !== 0 &&
+    playroll[pos].forEach((n) => guitarNotes[n].volume(0.5).play());
+}
 
 const [root, third, fifth, seventh] = ['root', 'third', 'fifth', 'seventh'];
 
@@ -139,6 +177,7 @@ function rootString(chord) {
 function buildClosedVoicing(chord) {
   const root = getRoot(chord);
   const qual = getQuality(chord);
+
   let result;
   let i = 0;
   try {
@@ -149,7 +188,9 @@ function buildClosedVoicing(chord) {
         closedVoicingChordTones[chord] = closedVoicingChordTones['F' + qual];
       }
       if (noteMap[1][i].includes(root)) {
+        console.log(closedVoicings['Bb' + qual]);
         result = closedVoicings['Bb' + qual].map((fret) => fret + (i - 1));
+
         closedVoicings[chord] = result;
         closedVoicingChordTones[chord] = closedVoicingChordTones['Bb' + qual];
       }
@@ -196,7 +237,7 @@ export function validateChords(progression) {
       return false;
     }
 
-    if (!['', 'min', '7', 'min7'].includes(qual)) {
+    if (!['', 'm', '7', 'm7'].includes(qual)) {
       window.alert(`Sorry, ${chord} is not supported in this app.`);
       return false;
     }

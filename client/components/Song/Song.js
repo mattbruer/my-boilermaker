@@ -9,6 +9,7 @@ import Chart from './Chart';
 import ControlBar from '../FooterControls/ControlBar';
 import Mixer from '../UI/Mixer/Mixer';
 import CapoModal from '../UI/CapoModal';
+import { flattenSong } from '../../audioFunctions/play';
 
 const Song = () => {
   const dispatch = useDispatch();
@@ -22,9 +23,11 @@ const Song = () => {
   useEffect(() => {
     allSongs.length && dispatch(selectSong(+params.songId));
   }, [allSongs]);
-
   const [song] = allSongs.filter((s) => s.id === selectedSong);
 
+  useEffect(() => {
+    selectedSong && flattenSong(song);
+  }, [selectedSong]);
   return (
     <Container>
       {toggleMixerModal && <Mixer />}

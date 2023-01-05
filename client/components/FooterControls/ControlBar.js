@@ -1,6 +1,6 @@
-import React from "react";
-import styled from "styled-components";
-import { CenteredDiv, PShadow } from "../styledDivs";
+import React from 'react';
+import styled from 'styled-components';
+import { CenteredDiv, PShadow } from '../styledDivs';
 import {
   Edit,
   PlayArrowOutlined,
@@ -8,10 +8,11 @@ import {
   Add,
   StopOutlined,
   Remove,
-} from "@mui/icons-material";
-import TempoSlider from "./TempoSlider";
-import { toggleMixer } from "../../store/mixerSlice";
-import { validateChords } from "../../audioFunctions/guitar";
+} from '@mui/icons-material';
+import TempoSlider from './TempoSlider';
+import { toggleMixer } from '../../store/mixerSlice';
+import { toggleCapoModal, disablePlay } from '../../store/uiSlice';
+import { validateChords, guitarCheck } from '../../audioFunctions/guitar';
 import {
   toggleEditMode,
   addMeasure,
@@ -19,32 +20,43 @@ import {
   saveChanges,
   playSong,
   stopSong,
-} from "../../store/songSlice";
-import Button from "@mui/material/Button";
-import { useDispatch, useSelector } from "react-redux";
+} from '../../store/songSlice';
+import Button from '@mui/material/Button';
+import { useDispatch, useSelector } from 'react-redux';
+import { flattenSong } from '../../audioFunctions/play';
 
 const ControlBar = () => {
   const dispatch = useDispatch();
-  const { editMode, allSongs, selectedSong, isPlaying } = useSelector(
+  const { editMode, measures, isPlaying, allSongs, selectedSong } = useSelector(
     (state) => state.songs
   );
+  const { playDisabled } = useSelector((state) => state.ui);
   const { toggleMixerModal } = useSelector((state) => state.mixer);
-
   const [song] = allSongs.filter((s) => s.id === selectedSong);
-
   return (
     <Container>
-      <CenteredDiv style={{ justifyContent: "space-around" }}>
+      <CenteredDiv style={{ justifyContent: 'space-around' }}>
         {editMode ? (
           <>
             <Button
               style={buttonStyle}
               variant="outlined"
               onClick={() => {
-                validateChords(song.measures) && dispatch(saveChanges(song));
+                // const playroll = new PlayRoll(song);
+                const valid = validateChords(measures);
+                flattenSong(song);
+                valid && dispatch(saveChanges(song));
+                guitarCheck();
               }}
             >
               Save
+            </Button>
+            <Button
+              style={buttonStyle}
+              variant="outlined"
+              onClick={() => dispatch(toggleCapoModal(true))}
+            >
+              Capo
             </Button>
             <Button
               style={buttonStyle}
@@ -62,20 +74,24 @@ const ControlBar = () => {
             </Button>
           </>
         ) : (
-          <CenteredDiv style={{ flexDirection: "column" }}>
-            <CenteredDiv style={{ margin: "10px" }}>
+          <CenteredDiv style={{ flexDirection: 'column' }}>
+            <CenteredDiv style={{ margin: '10px' }}>
               <Button
                 style={buttonStyle}
                 variant="outlined"
                 onClick={() => {
                   dispatch(toggleEditMode(!editMode));
+                  dispatch(disablePlay(true));
                 }}
               >
                 <Edit />
               </Button>
               <Button
+                disabled={!isPlaying && playDisabled}
                 onClick={() => {
-                  isPlaying ? dispatch(stopSong()) : dispatch(playSong());
+                  isPlaying
+                    ? dispatch(stopSong())
+                    : dispatch(playSong(measures));
                 }}
                 style={buttonStyle}
                 variant="outlined"
@@ -93,11 +109,11 @@ const ControlBar = () => {
 
             <CenteredDiv
               style={{
-                width: "90vw",
-                marginBottom: "5px",
+                width: '90vw',
+                marginBottom: '5px',
               }}
             >
-              <p style={{ fontSize: "20px", margin: "15px", color: "white" }}>
+              <p style={{ fontSize: '20px', margin: '15px', color: 'white' }}>
                 Tempo
               </p>
               <TempoSlider />
@@ -124,9 +140,9 @@ const Container = styled.div`
 `;
 
 const buttonStyle = {
-  backgroundColor: "white",
-  boxShadow: "5px -2px 10px black",
-  height: "40px",
-  width: "100%",
-  margin: "0 2vw 0 2vw",
+  backgroundColor: 'white',
+  boxShadow: '5px -2px 10px black',
+  height: '40px',
+  width: '100%',
+  margin: '0 2vw 0 2vw',
 };

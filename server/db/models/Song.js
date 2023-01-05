@@ -22,6 +22,10 @@ const Song = db.define('song', {
     // allowNull: false,
     defaultValue: 'C',
   },
+  capo: {
+    type: Sequelize.INTEGER,
+    defaultValue: 0,
+  },
 });
 
 module.exports = Song;

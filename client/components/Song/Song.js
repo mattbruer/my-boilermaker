@@ -8,6 +8,7 @@ import Measure from './Measure';
 import Chart from './Chart';
 import ControlBar from '../FooterControls/ControlBar';
 import Mixer from '../UI/Mixer/Mixer';
+import CapoModal from '../UI/CapoModal';
 
 const Song = () => {
   const dispatch = useDispatch();
@@ -16,6 +17,7 @@ const Song = () => {
     (state) => state.songs
   );
   const { toggleMixerModal } = useSelector((state) => state.mixer);
+  const { toggleCapoModal } = useSelector((state) => state.ui);
   //work on this useEffect unnecessay selectSongs
   useEffect(() => {
     allSongs.length && dispatch(selectSong(+params.songId));
@@ -26,6 +28,7 @@ const Song = () => {
   return (
     <Container>
       {toggleMixerModal && <Mixer />}
+      {toggleCapoModal && <CapoModal />}
 
       <CenteredDiv style={{ flexDirection: 'column' }}>
         {editMode ? (

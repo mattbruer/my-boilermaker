@@ -33,6 +33,7 @@ const Measure = ({ measureNumber }) => {
             onChange={(e) => handleChange(e, 0)}
             value={measure[0]}
           />
+
           <input
             style={{
               height: '40px',

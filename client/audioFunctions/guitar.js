@@ -1,14 +1,53 @@
-import { Howl } from "howler";
+import { ContentPasteSearchOutlined, PlayDisabled } from '@mui/icons-material';
+import { Howl } from 'howler';
+import store from '../store';
+import { disablePlay } from '../store/uiSlice';
+
+//memoization...sorta?
 const guitarNotes = {};
+const statusObj = {};
+let playroll;
+let flattenedSong;
 
-const getProgression = () =>
-  store
-    .getState()
-    .songs.allSongs.filter(
-      (song) => song.id === store.getState().songs.selectedSong
-    )[0].measures;
+export function guitarCheck() {
+  Object.values(statusObj).every((n) => n) &&
+    store.dispatch(disablePlay(false));
+}
 
-const [root, third, fifth, seventh] = ["root", "third", "fifth", "seventh"];
+function loadNotes(playroll) {
+  playroll.forEach((chord) => {
+    chord.forEach((fret, string) => {
+      let note = tuning[string] + fret;
+      if (!guitarNotes[note] && fret !== null) {
+        statusObj[note] = false;
+        guitarNotes[note] = new Howl({
+          src: [
+            `https://mvbguitarsamples.s3.us-east-2.amazonaws.com/guitar/${note}.mp3`,
+          ],
+          onload: () => {
+            statusObj[note] = true;
+            guitarCheck();
+          },
+        });
+      }
+    });
+  });
+  console.log(guitarNotes);
+}
+
+function applyCapo(voicing, capo) {
+  return voicing.map((note) => note + capo);
+}
+export function buildGuitarPlayroll(song, capo) {
+  flattenedSong = song.map((chord) => transposeToCapo(chord, capo));
+  playroll = flattenedSong.map((chord) => applyCapo(getVoicing(chord), capo));
+
+  loadNotes(playroll);
+}
+
+export function guitarPlay(flattenedSong, prevBassNote = null) {}
+
+const [root, third, fifth, seventh] = ['root', 'third', 'fifth', 'seventh'];
 
 const openVoicings = {
   A: [0, 0, 2, 2, 2, 0],
@@ -69,11 +108,10 @@ const closedVoicingChordTones = {
 };
 
 function getRoot(chord) {
-  return chord[1] === "b" || chord[1] === "#" ? chord[0] + chord[1] : chord[0];
+  return chord[1] === 'b' || chord[1] === '#' ? chord[0] + chord[1] : chord[0];
 }
 
 function getQuality(chord) {
-  console.log(chord);
   return chord.split(getRoot(chord))[1];
 }
 
@@ -92,7 +130,10 @@ function getVoicing(chord) {
 }
 
 function rootString(chord) {
-  return closedVoicingChordTones[chord]?.indexOf(root);
+  return (
+    openVoicingChordTones[chord]?.indexOf(root) ||
+    closedVoicingChordTones[chord]?.indexOf(root)
+  );
 }
 
 function buildClosedVoicing(chord) {
@@ -103,20 +144,20 @@ function buildClosedVoicing(chord) {
   try {
     while (!result && i < 10) {
       if (noteMap[0][i].includes(root)) {
-        result = closedVoicings["F" + qual].map((fret) => fret + (i - 1));
+        result = closedVoicings['F' + qual].map((fret) => fret + (i - 1));
         closedVoicings[chord] = result;
-        closedVoicingChordTones[chord] = closedVoicingChordTones["F" + qual];
+        closedVoicingChordTones[chord] = closedVoicingChordTones['F' + qual];
       }
       if (noteMap[1][i].includes(root)) {
-        result = closedVoicings["Bb" + qual].map((fret) => fret + (i - 1));
+        result = closedVoicings['Bb' + qual].map((fret) => fret + (i - 1));
         closedVoicings[chord] = result;
-        closedVoicingChordTones[chord] = closedVoicingChordTones["Bb" + qual];
+        closedVoicingChordTones[chord] = closedVoicingChordTones['Bb' + qual];
       }
       i++;
     }
     return result;
   } catch (error) {
-    return "that chord is not supported";
+    return 'that chord is not supported';
   }
 }
 
@@ -127,10 +168,11 @@ function transposeToCapo(chord, capo) {
     ? chromFlat[chromFlat.indexOf(root) + capo]
     : chromSharp[chromSharp.indexOf(root) + capo];
 
-  return getVoicing(newRoot + qual).map((fret) => fret + capo);
+  return newRoot + qual;
+  // return getVoicing(newRoot + qual).map((fret) => fret + capo);
 }
 
-const tuning = ["E", "A", "D", "G", "B", "e"];
+const tuning = ['E', 'A', 'D', 'G', 'B', 'e'];
 
 export function validateChords(progression) {
   // const progression = getProgression();
@@ -142,180 +184,173 @@ export function validateChords(progression) {
   return flatProg.every((chord, i) => {
     const root = getRoot(chord);
     const qual = getQuality(chord);
-
-    if (chord === "") {
+    if (i === 0 && chord === '') {
+      window.alert('There must be a chord on beat 1.');
+      return false;
+    }
+    if (chord === '') {
       return true;
     }
     if (!(chromFlat.includes(root) || chromSharp.includes(root))) {
-      window.alert(
-        `Sorry, ${chord} (measure ${i + 1}) is not supported in this app.`
-      );
+      window.alert(`Sorry, ${chord} is not supported in this app.`);
       return false;
     }
 
-    if (!["", "min", "7", "min7"].includes(qual)) {
-      window.alert(
-        `Sorry, ${chord} (measure ${i + 1}) is not supported in this app.`
-      );
+    if (!['', 'min', '7', 'min7'].includes(qual)) {
+      window.alert(`Sorry, ${chord} is not supported in this app.`);
       return false;
     }
-    getVoicing(chord).forEach((fret, string) => {
-      const note = `${tuning[string]}${fret}`;
-      if (!guitarNotes[note] && fret !== null) {
-        guitarNotes[note] = new Howl({
-          src: [
-            `https://mvbguitarsamples.s3.us-east-2.amazonaws.com/guitar/${note}.mp3`,
-          ],
-        });
-      }
-    });
+    // getVoicing(chord).forEach((fret, string) => {
+    //   const note = `${tuning[string]}${fret}`;
+    //   if (!guitarNotes[note] && fret !== null) {
+    //     guitarNotes[note] = new Howl({
+    //       src: [
+    //         `https://mvbguitarsamples.s3.us-east-2.amazonaws.com/guitar/${note}.mp3`,
+    //       ],
+    //     });
+    //   }
+    // });
     return true;
   });
 }
 
-export function guitarPlay(position) {
-  guitarNotes["E3"].play();
-  setTimeout(() => {
-    guitarNotes["B3"].play();
-  }, 1000);
-}
 const chromFlat = [
-  "G",
-  "Gb",
-  "F",
-  "E",
-  "Eb",
-  "D",
-  "Db",
-  "C",
-  "B",
-  "Bb",
-  "A",
-  "Ab",
-  "G",
-  "Gb",
-  "F",
-  "E",
-  "Eb",
-  "D",
-  "Db",
-  "C",
-  "B",
-  "Bb",
-  "A",
-  "Ab",
+  'G',
+  'Gb',
+  'F',
+  'E',
+  'Eb',
+  'D',
+  'Db',
+  'C',
+  'B',
+  'Bb',
+  'A',
+  'Ab',
+  'G',
+  'Gb',
+  'F',
+  'E',
+  'Eb',
+  'D',
+  'Db',
+  'C',
+  'B',
+  'Bb',
+  'A',
+  'Ab',
 ];
 
 const chromSharp = [
-  "G#",
-  "G",
-  "F#",
-  "F",
-  "E",
-  "D#",
-  "D",
-  "C#",
-  "C",
-  "B",
-  "A#",
-  "A",
-  "G#",
-  "G",
-  "F#",
-  "F",
-  "E",
-  "D#",
-  "D",
-  "C#",
-  "C",
-  "B",
-  "A#",
-  "A",
+  'G#',
+  'G',
+  'F#',
+  'F',
+  'E',
+  'D#',
+  'D',
+  'C#',
+  'C',
+  'B',
+  'A#',
+  'A',
+  'G#',
+  'G',
+  'F#',
+  'F',
+  'E',
+  'D#',
+  'D',
+  'C#',
+  'C',
+  'B',
+  'A#',
+  'A',
 ];
 
 const noteMap = [
   [
-    ["E"],
-    ["F"],
-    ["F#", "Gb"],
-    ["G"],
-    ["G#", "Ab"],
-    ["A"],
-    ["A#", "Bb"],
-    ["B"],
-    ["C"],
-    ["C#", "Db"],
-    ["D"],
-    ["D#", "Eb"],
+    ['E'],
+    ['F'],
+    ['F#', 'Gb'],
+    ['G'],
+    ['G#', 'Ab'],
+    ['A'],
+    ['A#', 'Bb'],
+    ['B'],
+    ['C'],
+    ['C#', 'Db'],
+    ['D'],
+    ['D#', 'Eb'],
   ],
   [
-    ["A"],
-    ["A#", "Bb"],
-    ["B"],
-    ["C"],
-    ["C#", "Db"],
-    ["D"],
-    ["D#", "Eb"],
-    ["E"],
-    ["F"],
-    ["F#", "Gb"],
-    ["G"],
-    ["G#", "Ab"],
+    ['A'],
+    ['A#', 'Bb'],
+    ['B'],
+    ['C'],
+    ['C#', 'Db'],
+    ['D'],
+    ['D#', 'Eb'],
+    ['E'],
+    ['F'],
+    ['F#', 'Gb'],
+    ['G'],
+    ['G#', 'Ab'],
   ],
   [
-    ["D"],
-    ["D#", "Eb"],
-    ["E"],
-    ["F"],
-    ["F#", "Gb"],
-    ["G"],
-    ["G#", "Ab"],
-    ["A"],
-    ["A#", "Bb"],
-    ["B"],
-    ["C"],
-    ["C#", "Db"],
+    ['D'],
+    ['D#', 'Eb'],
+    ['E'],
+    ['F'],
+    ['F#', 'Gb'],
+    ['G'],
+    ['G#', 'Ab'],
+    ['A'],
+    ['A#', 'Bb'],
+    ['B'],
+    ['C'],
+    ['C#', 'Db'],
   ],
   [
-    ["G"],
-    ["G#", "Ab"],
-    ["A"],
-    ["A#", "Bb"],
-    ["B"],
-    ["C"],
-    ["C#", "Db"],
-    ["D"],
-    ["D#", "Eb"],
-    ["E"],
-    ["F"],
-    ["F#", "Gb"],
+    ['G'],
+    ['G#', 'Ab'],
+    ['A'],
+    ['A#', 'Bb'],
+    ['B'],
+    ['C'],
+    ['C#', 'Db'],
+    ['D'],
+    ['D#', 'Eb'],
+    ['E'],
+    ['F'],
+    ['F#', 'Gb'],
   ],
   [
-    ["B"],
-    ["C"],
-    ["C#", "Db"],
-    ["D"],
-    ["D#", "Eb"],
-    ["E"],
-    ["F"],
-    ["F#", "Gb"],
-    ["G"],
-    ["G#", "Ab"],
-    ["A"],
-    ["A#", "Bb"],
+    ['B'],
+    ['C'],
+    ['C#', 'Db'],
+    ['D'],
+    ['D#', 'Eb'],
+    ['E'],
+    ['F'],
+    ['F#', 'Gb'],
+    ['G'],
+    ['G#', 'Ab'],
+    ['A'],
+    ['A#', 'Bb'],
   ],
   [
-    ["E"],
-    ["F"],
-    ["F#", "Gb"],
-    ["G"],
-    ["G#", "Ab"],
-    ["A"],
-    ["A#", "Bb"],
-    ["B"],
-    ["C"],
-    ["C#", "Db"],
-    ["D"],
-    ["D#", "Eb"],
+    ['E'],
+    ['F'],
+    ['F#', 'Gb'],
+    ['G'],
+    ['G#', 'Ab'],
+    ['A'],
+    ['A#', 'Bb'],
+    ['B'],
+    ['C'],
+    ['C#', 'Db'],
+    ['D'],
+    ['D#', 'Eb'],
   ],
 ];

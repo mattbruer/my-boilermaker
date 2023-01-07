@@ -1,6 +1,6 @@
-import { Howl } from 'howler';
-import store from '../store';
-import { disablePlay } from '../store/uiSlice';
+import { Howl } from "howler";
+import store from "../store";
+import { disablePlay } from "../store/uiSlice";
 
 //memoization...sorta?
 const guitarNotes = {};
@@ -144,7 +144,7 @@ export function guitarPlay() {
     });
 }
 
-const [root, third, fifth, seventh] = ['root', 'third', 'fifth', 'seventh'];
+const [root, third, fifth, seventh] = ["root", "third", "fifth", "seventh"];
 
 const openVoicings = {
   A: [0, 0, 2, 2, 2, 0],
@@ -205,7 +205,7 @@ const closedVoicingChordTones = {
 };
 
 function getRoot(chord) {
-  return chord[1] === 'b' || chord[1] === '#' ? chord[0] + chord[1] : chord[0];
+  return chord[1] === "b" || chord[1] === "#" ? chord[0] + chord[1] : chord[0];
 }
 
 function getQuality(chord) {
@@ -242,21 +242,21 @@ function buildClosedVoicing(chord) {
   try {
     while (!result && i < 10) {
       if (noteMap[0][i].includes(root)) {
-        result = closedVoicings['F' + qual].map((fret) => fret + (i - 1));
+        result = closedVoicings["F" + qual].map((fret) => fret + (i - 1));
         closedVoicings[chord] = result;
-        closedVoicingChordTones[chord] = closedVoicingChordTones['F' + qual];
+        closedVoicingChordTones[chord] = closedVoicingChordTones["F" + qual];
       }
       if (noteMap[1][i].includes(root)) {
-        result = closedVoicings['Bb' + qual].map((fret) => fret + (i - 1));
+        result = closedVoicings["Bb" + qual].map((fret) => fret + (i - 1));
 
         closedVoicings[chord] = result;
-        closedVoicingChordTones[chord] = closedVoicingChordTones['Bb' + qual];
+        closedVoicingChordTones[chord] = closedVoicingChordTones["Bb" + qual];
       }
       i++;
     }
     return result;
   } catch (error) {
-    return 'that chord is not supported';
+    return "that chord is not supported";
   }
 }
 
@@ -276,7 +276,7 @@ function transposeToCapo(chord, capo) {
   // return getVoicing(newRoot + qual).map((fret) => fret + capo);
 }
 
-const tuning = ['E', 'A', 'D', 'G', 'B', 'e'];
+const tuning = ["E", "A", "D", "G", "B", "e"];
 
 export function validateChords(progression) {
   // const progression = getProgression();
@@ -288,11 +288,11 @@ export function validateChords(progression) {
   return flatProg.every((chord, i) => {
     const root = getRoot(chord);
     const qual = getQuality(chord);
-    if (i === 0 && chord === '') {
-      window.alert('There must be a chord on beat 1.');
+    if (i === 0 && chord === "") {
+      window.alert("There must be a chord on beat 1.");
       return false;
     }
-    if (chord === '') {
+    if (chord === "") {
       return true;
     }
     if (!(chromFlat.includes(root) || chromSharp.includes(root))) {
@@ -300,7 +300,7 @@ export function validateChords(progression) {
       return false;
     }
 
-    if (!['', 'm', '7', 'm7'].includes(qual)) {
+    if (!["", "m", "7", "m7"].includes(qual)) {
       window.alert(`Sorry, ${chord} is not supported in this app.`);
       return false;
     }
@@ -318,143 +318,143 @@ export function validateChords(progression) {
   });
 }
 
-const chromFlat = [
-  'G',
-  'Gb',
-  'F',
-  'E',
-  'Eb',
-  'D',
-  'Db',
-  'C',
-  'B',
-  'Bb',
-  'A',
-  'Ab',
-  'G',
-  'Gb',
-  'F',
-  'E',
-  'Eb',
-  'D',
-  'Db',
-  'C',
-  'B',
-  'Bb',
-  'A',
-  'Ab',
+export const chromFlat = [
+  "G",
+  "Gb",
+  "F",
+  "E",
+  "Eb",
+  "D",
+  "Db",
+  "C",
+  "B",
+  "Bb",
+  "A",
+  "Ab",
+  "G",
+  "Gb",
+  "F",
+  "E",
+  "Eb",
+  "D",
+  "Db",
+  "C",
+  "B",
+  "Bb",
+  "A",
+  "Ab",
 ];
 
-const chromSharp = [
-  'G#',
-  'G',
-  'F#',
-  'F',
-  'E',
-  'D#',
-  'D',
-  'C#',
-  'C',
-  'B',
-  'A#',
-  'A',
-  'G#',
-  'G',
-  'F#',
-  'F',
-  'E',
-  'D#',
-  'D',
-  'C#',
-  'C',
-  'B',
-  'A#',
-  'A',
+export const chromSharp = [
+  "G#",
+  "G",
+  "F#",
+  "F",
+  "E",
+  "D#",
+  "D",
+  "C#",
+  "C",
+  "B",
+  "A#",
+  "A",
+  "G#",
+  "G",
+  "F#",
+  "F",
+  "E",
+  "D#",
+  "D",
+  "C#",
+  "C",
+  "B",
+  "A#",
+  "A",
 ];
 
 const noteMap = [
   [
-    ['E'],
-    ['F'],
-    ['F#', 'Gb'],
-    ['G'],
-    ['G#', 'Ab'],
-    ['A'],
-    ['A#', 'Bb'],
-    ['B'],
-    ['C'],
-    ['C#', 'Db'],
-    ['D'],
-    ['D#', 'Eb'],
+    ["E"],
+    ["F"],
+    ["F#", "Gb"],
+    ["G"],
+    ["G#", "Ab"],
+    ["A"],
+    ["A#", "Bb"],
+    ["B"],
+    ["C"],
+    ["C#", "Db"],
+    ["D"],
+    ["D#", "Eb"],
   ],
   [
-    ['A'],
-    ['A#', 'Bb'],
-    ['B'],
-    ['C'],
-    ['C#', 'Db'],
-    ['D'],
-    ['D#', 'Eb'],
-    ['E'],
-    ['F'],
-    ['F#', 'Gb'],
-    ['G'],
-    ['G#', 'Ab'],
+    ["A"],
+    ["A#", "Bb"],
+    ["B"],
+    ["C"],
+    ["C#", "Db"],
+    ["D"],
+    ["D#", "Eb"],
+    ["E"],
+    ["F"],
+    ["F#", "Gb"],
+    ["G"],
+    ["G#", "Ab"],
   ],
   [
-    ['D'],
-    ['D#', 'Eb'],
-    ['E'],
-    ['F'],
-    ['F#', 'Gb'],
-    ['G'],
-    ['G#', 'Ab'],
-    ['A'],
-    ['A#', 'Bb'],
-    ['B'],
-    ['C'],
-    ['C#', 'Db'],
+    ["D"],
+    ["D#", "Eb"],
+    ["E"],
+    ["F"],
+    ["F#", "Gb"],
+    ["G"],
+    ["G#", "Ab"],
+    ["A"],
+    ["A#", "Bb"],
+    ["B"],
+    ["C"],
+    ["C#", "Db"],
   ],
   [
-    ['G'],
-    ['G#', 'Ab'],
-    ['A'],
-    ['A#', 'Bb'],
-    ['B'],
-    ['C'],
-    ['C#', 'Db'],
-    ['D'],
-    ['D#', 'Eb'],
-    ['E'],
-    ['F'],
-    ['F#', 'Gb'],
+    ["G"],
+    ["G#", "Ab"],
+    ["A"],
+    ["A#", "Bb"],
+    ["B"],
+    ["C"],
+    ["C#", "Db"],
+    ["D"],
+    ["D#", "Eb"],
+    ["E"],
+    ["F"],
+    ["F#", "Gb"],
   ],
   [
-    ['B'],
-    ['C'],
-    ['C#', 'Db'],
-    ['D'],
-    ['D#', 'Eb'],
-    ['E'],
-    ['F'],
-    ['F#', 'Gb'],
-    ['G'],
-    ['G#', 'Ab'],
-    ['A'],
-    ['A#', 'Bb'],
+    ["B"],
+    ["C"],
+    ["C#", "Db"],
+    ["D"],
+    ["D#", "Eb"],
+    ["E"],
+    ["F"],
+    ["F#", "Gb"],
+    ["G"],
+    ["G#", "Ab"],
+    ["A"],
+    ["A#", "Bb"],
   ],
   [
-    ['E'],
-    ['F'],
-    ['F#', 'Gb'],
-    ['G'],
-    ['G#', 'Ab'],
-    ['A'],
-    ['A#', 'Bb'],
-    ['B'],
-    ['C'],
-    ['C#', 'Db'],
-    ['D'],
-    ['D#', 'Eb'],
+    ["E"],
+    ["F"],
+    ["F#", "Gb"],
+    ["G"],
+    ["G#", "Ab"],
+    ["A"],
+    ["A#", "Bb"],
+    ["B"],
+    ["C"],
+    ["C#", "Db"],
+    ["D"],
+    ["D#", "Eb"],
   ],
 ];

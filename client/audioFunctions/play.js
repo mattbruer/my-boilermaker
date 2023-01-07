@@ -16,7 +16,7 @@ export function flattenSong(song) {
       newMeasures[i] = newMeasures[i - 1];
     }
   });
-  buildGuitarPlayroll(newMeasures, song.capo);
+  buildGuitarPlayroll(newMeasures, store.getState().songs.capo);
   flattenedSong = newMeasures;
 }
 

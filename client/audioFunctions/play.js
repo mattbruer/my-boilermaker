@@ -1,9 +1,10 @@
 // import store from "../store";
 import store from '../store';
 import { guitarPlay } from './guitar';
-import { advancePosition } from '../store/songSlice';
+import { mandoPlay } from './mando';
+import { advancePosition, playSong } from '../store/songSlice';
 import { buildGuitarPlayroll } from './guitar';
-
+import { buildMandoPlayroll } from './mando';
 let flattenedSong;
 
 export function flattenSong(song) {
@@ -17,16 +18,18 @@ export function flattenSong(song) {
     }
   });
   buildGuitarPlayroll(newMeasures, store.getState().songs.capo);
+
+  buildMandoPlayroll(newMeasures);
   flattenedSong = newMeasures;
 }
 
 export function play() {
   guitarPlay();
+  mandoPlay();
   store.dispatch(advancePosition());
-
   setTimeout(() => {
     store.getState().songs.isPlaying && play();
-  }, 500);
+  }, 400);
 }
 // const sound = new Howl({
 //   src: ["https://mvbguitarsamples.s3.us-east-2.amazonaws.com/guitar/E5.mp3"],

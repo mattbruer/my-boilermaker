@@ -12,7 +12,11 @@ import {
 import TempoSlider from './TempoSlider';
 import { toggleMixer } from '../../store/mixerSlice';
 import { toggleCapoModal, disablePlay } from '../../store/uiSlice';
-import { validateChords, guitarCheck } from '../../audioFunctions/guitar';
+import {
+  validateChords,
+  guitarCheck,
+  guitarPlay,
+} from '../../audioFunctions/guitar';
 import {
   toggleEditMode,
   addMeasure,
@@ -23,7 +27,7 @@ import {
 } from '../../store/songSlice';
 import Button from '@mui/material/Button';
 import { useDispatch, useSelector } from 'react-redux';
-import { flattenSong } from '../../audioFunctions/play';
+import { E, flattenSong, play } from '../../audioFunctions/play';
 
 const ControlBar = () => {
   const dispatch = useDispatch();
@@ -96,7 +100,9 @@ const ControlBar = () => {
                 onClick={() => {
                   isPlaying
                     ? dispatch(stopSong())
-                    : dispatch(playSong(measures));
+                    : (() => {
+                        dispatch(playSong());
+                      })();
                 }}
                 style={buttonStyle}
                 variant="outlined"

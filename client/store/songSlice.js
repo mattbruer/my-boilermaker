@@ -8,13 +8,10 @@ let interval;
 let pos = 0;
 
 //i made tis a thunk because it has side effects...
-export const playSong = createAsyncThunk(
-  'song/playSong',
-  (measures, thunkAPI) => {
-    thunkAPI.dispatch(togglePlay(true));
-    play(thunkAPI.getState().songs.measures);
-  }
-);
+export const playSong = createAsyncThunk('song/playSong', (_, thunkAPI) => {
+  thunkAPI.dispatch(togglePlay(true));
+  play();
+});
 
 export const stopSong = createAsyncThunk('song/stopSong', (_, thunkAPI) => {
   thunkAPI.dispatch(togglePlay(false));

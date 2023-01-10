@@ -1,17 +1,18 @@
 import React from 'react';
 import { CenteredDiv } from '../styledDivs';
 import Modal from './Modal';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { toggleCapoModal } from '../../store/uiSlice';
 import { setCapo } from '../../store/songSlice';
 const CapoModal = () => {
   const dispatch = useDispatch();
-
+  const { capo } = useSelector((state) => state.songs);
   return (
     <Modal style={style}>
       <CenteredDiv style={{ flexDirection: 'column' }}>
         <h2>Guitar Capo</h2>
         <select
+          value={capo}
           onChange={(e) => dispatch(setCapo(+e.target.value))}
           style={{ fontSize: '20px' }}
         >
@@ -31,15 +32,15 @@ const CapoModal = () => {
 export default CapoModal;
 
 const style = {
-  width: '80%',
+  width: '200px',
   height: '25vh',
-  margin: '10vh 10% 0 10%',
-  marginTop: '10vh',
+  margin: '23vh calc((100vw - 200px)/2) 0 calc((100vw - 200px)/2)',
+
   zIndex: '1001',
   position: 'fixed',
-  backgroundColor: 'white',
+  backgroundColor: 'grey',
   border: '5px groove aqua',
   borderRadius: '50px',
   overflow: 'scroll',
-  color: 'black',
+  color: 'white',
 };

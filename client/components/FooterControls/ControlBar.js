@@ -86,6 +86,7 @@ const ControlBar = () => {
           <CenteredDiv style={{ flexDirection: 'column' }}>
             <CenteredDiv style={{ margin: '10px' }}>
               <Button
+                disabled={isPlaying}
                 style={buttonStyle}
                 variant="outlined"
                 onClick={() => {

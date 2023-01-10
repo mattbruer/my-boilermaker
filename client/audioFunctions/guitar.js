@@ -41,7 +41,27 @@ function applyCapo(voicing, capo) {
   });
 }
 
+const CIndexes = [];
+let noteToHammer;
+let hammerNote;
+
+function hammerOn(choice) {
+  guitarNotes[hammerNote].volume(0.8).stereo(0.5).play();
+  guitarNotes[choice].volume(0).stereo(0.5).play();
+
+  setTimeout(() => {
+    guitarNotes[hammerNote].fade(0.8, 0, 100);
+    guitarNotes[choice].volume(0.8);
+  }, 200);
+}
+
 export function buildGuitarPlayroll(song, capo) {
+  song.forEach((ch, i) => {
+    if (ch === 'C') {
+      CIndexes.push(i * 2);
+    }
+  });
+
   flattenedSong = song.map((chord) => transposeToCapo(chord, capo));
 
   playroll = flattenedSong.map((chord) => applyCapo(getVoicing(chord), capo));
@@ -70,6 +90,15 @@ export function buildGuitarPlayroll(song, capo) {
     spread.push(ch.slice(3));
   });
   playroll = spread;
+  noteToHammer = playroll[CIndexes[0]][2];
+
+  hammerNote = 'D' + (+noteToHammer[1] - 2);
+
+  if (!guitarNotes[hammerNote]) {
+    guitarNotes[hammerNote] = new Howl({
+      src: [`/guitar/${hammerNote}.mp3`],
+    });
+  }
 }
 
 function checkHalfSteps(note, choices) {
@@ -98,7 +127,7 @@ function silenceRingingNotes(note) {
     (str) => str[0] === string
   );
 
-  notesToSilence.forEach((n) => guitarNotes[n].fade(1, 0, 10));
+  notesToSilence.forEach((n) => guitarNotes[n].fade(1, 0, 0));
 }
 
 let prevBassNote;
@@ -119,28 +148,43 @@ export function guitarPlay() {
       // let whole = null;
       if (half) {
         silenceRingingNotes(half);
-        guitarNotes[half].volume(0.7).stereo(0.5).play();
+        if (CIndexes.includes(pos) && half === noteToHammer) {
+          hammerOn(half);
+        } else guitarNotes[half].volume(0.7).stereo(0.5).play();
         prevBassNote = half;
       } else if (whole) {
         silenceRingingNotes(whole);
-        guitarNotes[whole].volume(0.7).stereo(0.5).play();
+        if (CIndexes.includes(pos) && whole === noteToHammer) {
+          hammerOn(whole);
+        } else guitarNotes[whole].volume(0.7).stereo(0.5).play();
         prevBassNote = whole;
       } else {
         let len = choices.length;
         let note = choices[Math.floor(Math.random() * len)];
         silenceRingingNotes(note);
-        guitarNotes[note].volume(0.7).stereo(0.5).play();
+        if (CIndexes.includes(pos) && note === noteToHammer) {
+          hammerOn(note);
+        } else guitarNotes[note].volume(0.7).stereo(0.5).play();
         prevBassNote = note;
       }
     }
   }
+  // const reverse = playroll[pos].reverse();
   pos % 2 !== 0 &&
-    playroll[pos].forEach((note, i) => {
-      setTimeout(() => {
-        silenceRingingNotes(note);
-        guitarNotes[note].volume(0.25).stereo(0.5).play();
-      }, i * 10);
-    });
+    (() => {
+      playroll[pos].forEach((note, i) => {
+        setTimeout(() => {
+          silenceRingingNotes(note);
+          guitarNotes[note].volume(0.25).stereo(0.5).play();
+        }, i * 10);
+      });
+      // setTimeout(() => {
+      //   reverse.forEach((note) => {
+      //     silenceRingingNotes(note);
+      //     guitarNotes[note].volume(0.15).stereo(0.5).play();
+      //   });
+      // }, 200);
+    })();
 }
 
 const [root, third, fifth, seventh] = ['root', 'third', 'fifth', 'seventh'];

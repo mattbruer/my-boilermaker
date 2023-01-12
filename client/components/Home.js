@@ -11,7 +11,8 @@ const Home = () => {
   const dispatch = useDispatch();
   const [openModal, setOpenModal] = useState(false);
 
-  const state = useSelector((state) => state);
+  const { allSongs } = useSelector((state) => state.songs);
+  const auth = useSelector((state) => state.auth);
 
   return (
     <CenteredDiv style={styles.container}>
@@ -25,8 +26,8 @@ const Home = () => {
           boxShadow: '5px 5px 5px black',
         }}
       >
-        <PShadow>{state.auth.email} Songs</PShadow>
-        {state.songs.allSongs.map((s) => (
+        <PShadow>{auth.email} Songs</PShadow>
+        {allSongs.map((s) => (
           <Link key={s.id} to={`/song/${s.id}`}>
             <PShadow>{s.title}</PShadow>
           </Link>

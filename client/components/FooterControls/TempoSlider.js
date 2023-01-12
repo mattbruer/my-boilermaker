@@ -9,8 +9,9 @@ const TempoSlider = () => {
   return (
     <Slider
       style={{ width: '100%', margin: '0 3vw 0 3vw' }}
-      defaultValue={50}
       value={tempo}
+      min={0}
+      max={300}
       onChange={(e) => dispatch(changeTempo(e.target.value))}
       aria-label="Default"
       valueLabelDisplay="auto"

@@ -23,13 +23,22 @@ export function flattenSong(song) {
   flattenedSong = newMeasures;
 }
 
+let expectedTime;
+let prevTime;
+export function getExpectedTime() {
+  return expectedTime;
+}
+export function initExpectedTime() {
+  expectedTime = Date.now() + 60000 / store.getState().songs.tempo;
+}
 export function play() {
   guitarPlay();
   mandoPlay();
   store.dispatch(advancePosition());
   setTimeout(() => {
     store.getState().songs.isPlaying && play();
-  }, 400);
+  }, expectedTime - Date.now());
+  expectedTime += 60000 / store.getState().songs.tempo;
 }
 // const sound = new Howl({
 //   src: ["https://mvbguitarsamples.s3.us-east-2.amazonaws.com/guitar/E5.mp3"],

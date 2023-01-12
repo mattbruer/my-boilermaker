@@ -8,7 +8,7 @@ import { checkFirst } from '../../store/helperFunctions';
 
 const Measure = ({ measureNumber }) => {
   const dispatch = useDispatch();
-  const { measures, editMode } = useSelector((state) => state.songs);
+  const { measures, editMode, position } = useSelector((state) => state.songs);
 
   const measure = measures[measureNumber];
 

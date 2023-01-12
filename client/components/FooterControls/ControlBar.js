@@ -27,7 +27,7 @@ import {
 } from '../../store/songSlice';
 import Button from '@mui/material/Button';
 import { useDispatch, useSelector } from 'react-redux';
-import { E, flattenSong, play } from '../../audioFunctions/play';
+import { flattenSong, initExpectedTime } from '../../audioFunctions/play';
 
 const ControlBar = () => {
   const dispatch = useDispatch();
@@ -102,6 +102,7 @@ const ControlBar = () => {
                   isPlaying
                     ? dispatch(stopSong())
                     : (() => {
+                        initExpectedTime();
                         dispatch(playSong());
                       })();
                 }}

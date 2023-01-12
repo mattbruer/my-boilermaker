@@ -2,6 +2,16 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
 import history from '../history';
 
+export const forgotPassword = createAsyncThunk(
+  'auth/forgotPassword',
+  async (email, thunkAPI) => {
+    const { data } = await axios.post('/auth/forgotPassword', email);
+
+    console.log('response', data);
+    // return thunkAPI.dispatch(setAuth(res.data));
+  }
+);
+
 export const me = createAsyncThunk('auth/me', async (_, thunkAPI) => {
   const token = window.localStorage.getItem('token');
 

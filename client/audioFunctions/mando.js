@@ -70,7 +70,6 @@ function populateVoicings() {
       }
     }
   });
-  console.log(voicings);
 }
 populateVoicings();
 // function findChopChord(chord) {
@@ -101,6 +100,7 @@ export function buildMandoPlayroll(measures) {
         statusObj[note] = false;
         mandoNotes[note] = new Howl({
           src: [`/mando/${note}.mp3`],
+
           onload: () => {
             statusObj[note] = true;
 
@@ -118,6 +118,7 @@ export function mandoPlay() {
   // console.log(playroll);
   pos % 2 !== 0 &&
     playroll[pos].forEach((fret, string) => {
+      console.log(mandoNotes[tuning[string] + fret]);
       mandoNotes[tuning[string] + fret].stereo(-0.5).volume(0.5).play();
     });
 }

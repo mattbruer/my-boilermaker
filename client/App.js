@@ -7,9 +7,11 @@ import { loadUserSongs } from './store/songSlice';
 const App = () => {
   const dispatch = useDispatch();
 
+  const auth = useSelector((state) => state.auth);
+
   useEffect(() => {
     dispatch(loadUserSongs());
-  }, []);
+  }, [auth]);
 
   return (
     <div>

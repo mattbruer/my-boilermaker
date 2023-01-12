@@ -71,7 +71,7 @@ const initialState = {
   measuresPerLine: 4,
   timeSig: [2, 2],
   editMode: false,
-  tempo: 0,
+  tempo: 60,
   isPlaying: false,
   validChords: false,
   capo: 0,

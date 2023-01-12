@@ -2,11 +2,15 @@ import React, { useEffect } from 'react';
 import { connect, useSelector } from 'react-redux';
 import { authenticate } from '../store';
 import { useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
+import MuiModal from './UI/MuiModal';
+import Button from '@mui/material/Button';
 
-/**
- * COMPONENT
- */
 const AuthForm = (props) => {
+  const [open, setOpen] = React.useState(false);
+  const handleOpen = () => setOpen(true);
+  const handleClose = () => setOpen(false);
+
   const navigate = useNavigate();
   const { name, displayName, handleSubmit, error } = props;
   const auth = useSelector((state) => state.auth);
@@ -25,6 +29,7 @@ const AuthForm = (props) => {
         height: 'calc(100vh - 64px)',
       }}
     >
+      <MuiModal open={open} handleClose={handleClose} />
       <form onSubmit={handleSubmit} name={name}>
         <div>
           <label htmlFor="email">
@@ -43,6 +48,9 @@ const AuthForm = (props) => {
         </div>
         {error && error.response && <div> {error.response.data} </div>}
       </form>
+      <div>
+        <Button onClick={handleOpen}>Forgot Password?</Button>
+      </div>
     </div>
   );
 };

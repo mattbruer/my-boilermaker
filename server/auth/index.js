@@ -32,3 +32,11 @@ router.get('/me', async (req, res, next) => {
     next(ex);
   }
 });
+
+router.post('/forgotPassword', async (req, res, next) => {
+  try {
+    const { email } = req.body;
+  } catch (err) {
+    next(err);
+  }
+});

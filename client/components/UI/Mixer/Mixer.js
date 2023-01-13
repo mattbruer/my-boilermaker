@@ -7,8 +7,8 @@ const Mixer = () => {
     <Modal style={style}>
       <InstContainer>
         <p style={{ textAlign: 'center', marginBottom: '5px' }}>Mando</p>
-        <StereoSlider instrument="mandolin" />
-        <StereoSlider instrument="mandolin" />
+        <StereoSlider instrument="mando" />
+        <StereoSlider instrument="mando" />
       </InstContainer>
       <InstContainer>
         <p style={{ textAlign: 'center', marginBottom: '5px' }}>Guitar</p>

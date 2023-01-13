@@ -118,7 +118,9 @@ export function mandoPlay() {
   // console.log(playroll);
   pos % 2 !== 0 &&
     playroll[pos].forEach((fret, string) => {
-      console.log(mandoNotes[tuning[string] + fret]);
-      mandoNotes[tuning[string] + fret].stereo(-0.5).volume(0.5).play();
+      mandoNotes[tuning[string] + fret]
+        .stereo(store.getState().mixer.balance['mando'] / 100)
+        .volume(0.5)
+        .play();
     });
 }

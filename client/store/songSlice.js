@@ -1,15 +1,13 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
-import history from '../history';
-import { sendToken } from './helperFunctions';
-import { play } from '../audioFunctions/play';
 
-let interval;
-let pos = 0;
+import { sendToken } from './helperFunctions';
+import { play, initExpectedTime } from '../audioFunctions/play';
 
 //i made tis a thunk because it has side effects...
 export const playSong = createAsyncThunk('song/playSong', (_, thunkAPI) => {
   thunkAPI.dispatch(togglePlay(true));
+  initExpectedTime();
   play();
 });
 
@@ -71,7 +69,7 @@ const initialState = {
   measuresPerLine: 4,
   timeSig: [2, 2],
   editMode: false,
-  tempo: 60,
+  tempo: 120,
   isPlaying: false,
   validChords: false,
   capo: 0,

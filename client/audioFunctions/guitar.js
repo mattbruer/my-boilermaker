@@ -48,13 +48,18 @@ let noteToHammer;
 let hammerNote;
 
 function hammerOn(choice) {
-  guitarNotes[hammerNote].volume(0.8).stereo(0.5).play();
-  guitarNotes[choice].volume(0).stereo(0.5).play();
-
   setTimeout(() => {
-    guitarNotes[hammerNote].fade(0.8, 0, 1);
+    guitarNotes[hammerNote].fade(0.8, 0, 10);
     guitarNotes[choice].volume(0.8);
   }, 60000 / store.getState().songs.tempo / 2);
+  guitarNotes[hammerNote]
+    .volume(0.8)
+    .stereo(store.getState().mixer.balance['guitar'] / 100)
+    .play();
+  guitarNotes[choice]
+    .volume(0)
+    .stereo(store.getState().mixer.balance['guitar'] / 100)
+    .play();
 }
 
 let CIndexes = [];
@@ -140,13 +145,14 @@ let prevBassNote;
 
 export function guitarPlay() {
   let pos = store.getState().songs.position;
+  let balance = store.getState().mixer.balance['guitar'] / 100;
   if (pos % 2 === 0) {
     if (pos === 0) {
       let note = playroll[0][playrollChordTones[0].indexOf(root)];
 
       // console.log(pos, note);
       silenceRingingNotes(note);
-      guitarNotes[note].volume(0.7).stereo(0.5).play();
+      guitarNotes[note].volume(0.7).stereo(balance).play();
 
       prevBassNote = note;
     } else {
@@ -160,7 +166,7 @@ export function guitarPlay() {
         if (CIndexes.includes(pos) && half === noteToHammer) {
           hammerOn(half);
         } else {
-          guitarNotes[half].volume(0.7).stereo(0.5).play();
+          guitarNotes[half].volume(0.7).stereo(balance).play();
         }
         prevBassNote = half;
       } else if (whole) {
@@ -169,7 +175,7 @@ export function guitarPlay() {
         if (CIndexes.includes(pos) && whole === noteToHammer) {
           hammerOn(whole);
         } else {
-          guitarNotes[whole].volume(0.7).stereo(0.5).play();
+          guitarNotes[whole].volume(0.7).stereo(balance).play();
         }
         prevBassNote = whole;
       } else {
@@ -180,7 +186,7 @@ export function guitarPlay() {
           hammerOn(note);
         } else {
           // console.log(pos, note);
-          guitarNotes[note].volume(0.7).stereo(0.5).play();
+          guitarNotes[note].volume(0.7).stereo(balance).play();
         }
         prevBassNote = note;
       }
@@ -189,18 +195,20 @@ export function guitarPlay() {
   const reverse = [...playroll[pos]].reverse();
   pos % 2 !== 0 &&
     (() => {
-      playroll[pos].forEach((note, i) => {
-        setTimeout(() => {
-          silenceRingingNotes(note);
-          guitarNotes[note].volume(0.25).stereo(0.5).play();
-        }, i * 20);
-      });
-      //random upstrokes for realness
       Math.floor(Math.random() * 10) === 1 &&
         setTimeout(() => {
           silenceRingingNotes(guitarNotes[reverse[0]]);
-          guitarNotes[reverse[0]].volume(0.3).stereo(0.5).play();
+          guitarNotes[reverse[0]].volume(0.3).stereo(balance).play();
         }, 60000 / store.getState().songs.tempo / 2);
+
+      playroll[pos].forEach((note, i) => {
+        setTimeout(() => {
+          silenceRingingNotes(note);
+          guitarNotes[note].volume(0.25).stereo(balance).play();
+        }, (i * store.getState().songs.tempo) / 4);
+      });
+
+      //random upstrokes for realness
     })();
 }
 

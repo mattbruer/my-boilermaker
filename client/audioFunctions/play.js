@@ -1,10 +1,10 @@
 // import store from "../store";
-import store from '../store';
-import { guitarPlay } from './guitar';
-import { mandoPlay } from './mando';
-import { advancePosition, playSong } from '../store/songSlice';
-import { buildGuitarPlayroll } from './guitar';
-import { buildMandoPlayroll } from './mando';
+import store from "../store";
+import { guitarPlay } from "./guitar";
+import { mandoPlay } from "./mando";
+import { advancePosition, playSong } from "../store/songSlice";
+import { buildGuitarPlayroll } from "./guitar";
+import { buildMandoPlayroll } from "./mando";
 let flattenedSong;
 
 export function flattenSong(song) {
@@ -13,7 +13,7 @@ export function flattenSong(song) {
     newMeasures.push(m[0], m[1]);
   });
   newMeasures.forEach((chord, i) => {
-    if (chord === '') {
+    if (chord === "") {
       newMeasures[i] = newMeasures[i - 1];
     }
   });

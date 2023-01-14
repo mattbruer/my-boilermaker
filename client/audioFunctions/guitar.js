@@ -1,7 +1,7 @@
-import { Howl } from 'howler';
-import store from '../store';
-import { disablePlay } from '../store/uiSlice';
-import { chromSharp, chromFlat, getRoot, getQuality } from './chordScales';
+import { Howl } from "howler";
+import store from "../store";
+import { disablePlay } from "../store/uiSlice";
+import { chromSharp, chromFlat, getRoot, getQuality } from "./chordScales";
 //memoization...sorta?
 const guitarNotes = {};
 const statusObj = {};
@@ -48,17 +48,18 @@ let noteToHammer;
 let hammerNote;
 
 function hammerOn(choice) {
+  let volDec = store.getState().mixer.volume["guitar"] / 100;
   setTimeout(() => {
-    guitarNotes[hammerNote].fade(0.8, 0, 10);
-    guitarNotes[choice].volume(0.8);
+    guitarNotes[hammerNote].fade(0.8 * volDec, 0, 10);
+    guitarNotes[choice].volume(0.8 * volDec);
   }, 60000 / store.getState().songs.tempo / 2);
   guitarNotes[hammerNote]
-    .volume(0.8)
-    .stereo(store.getState().mixer.balance['guitar'] / 100)
+    .volume(0.8 * volDec)
+    .stereo(store.getState().mixer.balance["guitar"] / 100)
     .play();
   guitarNotes[choice]
     .volume(0)
-    .stereo(store.getState().mixer.balance['guitar'] / 100)
+    .stereo(store.getState().mixer.balance["guitar"] / 100)
     .play();
 }
 
@@ -66,7 +67,7 @@ let CIndexes = [];
 export function buildGuitarPlayroll(song, capo) {
   CIndexes = [];
   song.forEach((ch, i) => {
-    if (ch === 'C') {
+    if (ch === "C") {
       CIndexes.push(i * 2);
     }
   });
@@ -102,7 +103,7 @@ export function buildGuitarPlayroll(song, capo) {
 
   if (CIndexes.length) {
     noteToHammer = playroll[CIndexes[0]][2];
-    hammerNote = 'D' + (+noteToHammer[1] - 2);
+    hammerNote = "D" + (+noteToHammer[1] - 2);
 
     if (!guitarNotes[hammerNote]) {
       guitarNotes[hammerNote] = new Howl({
@@ -144,15 +145,20 @@ function silenceRingingNotes(note) {
 let prevBassNote;
 
 export function guitarPlay() {
+  let volDec = store.getState().mixer.volume["guitar"] / 100;
+  let tempo = store.getState().songs.tempo;
   let pos = store.getState().songs.position;
-  let balance = store.getState().mixer.balance['guitar'] / 100;
+  let balance = store.getState().mixer.balance["guitar"] / 100;
   if (pos % 2 === 0) {
     if (pos === 0) {
       let note = playroll[0][playrollChordTones[0].indexOf(root)];
 
       // console.log(pos, note);
       silenceRingingNotes(note);
-      guitarNotes[note].volume(0.7).stereo(balance).play();
+      guitarNotes[note]
+        .volume(0.7 * volDec)
+        .stereo(balance)
+        .play();
 
       prevBassNote = note;
     } else {
@@ -166,7 +172,10 @@ export function guitarPlay() {
         if (CIndexes.includes(pos) && half === noteToHammer) {
           hammerOn(half);
         } else {
-          guitarNotes[half].volume(0.7).stereo(balance).play();
+          guitarNotes[half]
+            .volume(0.7 * volDec)
+            .stereo(balance)
+            .play();
         }
         prevBassNote = half;
       } else if (whole) {
@@ -175,7 +184,10 @@ export function guitarPlay() {
         if (CIndexes.includes(pos) && whole === noteToHammer) {
           hammerOn(whole);
         } else {
-          guitarNotes[whole].volume(0.7).stereo(balance).play();
+          guitarNotes[whole]
+            .volume(0.7 * volDec)
+            .stereo(balance)
+            .play();
         }
         prevBassNote = whole;
       } else {
@@ -186,7 +198,10 @@ export function guitarPlay() {
           hammerOn(note);
         } else {
           // console.log(pos, note);
-          guitarNotes[note].volume(0.7).stereo(balance).play();
+          guitarNotes[note]
+            .volume(0.7 * volDec)
+            .stereo(balance)
+            .play();
         }
         prevBassNote = note;
       }
@@ -194,25 +209,32 @@ export function guitarPlay() {
   }
   const reverse = [...playroll[pos]].reverse();
   pos % 2 !== 0 &&
+    tempo <= 192 &&
     (() => {
       Math.floor(Math.random() * 10) === 1 &&
         setTimeout(() => {
           silenceRingingNotes(guitarNotes[reverse[0]]);
-          guitarNotes[reverse[0]].volume(0.3).stereo(balance).play();
-        }, 60000 / store.getState().songs.tempo / 2);
-
+          guitarNotes[reverse[0]]
+            .volume(0.3 * volDec)
+            .stereo(balance)
+            .play();
+        }, 60000 / tempo / 2);
+      //strum
       playroll[pos].forEach((note, i) => {
         setTimeout(() => {
           silenceRingingNotes(note);
-          guitarNotes[note].volume(0.25).stereo(balance).play();
-        }, (i * store.getState().songs.tempo) / 4);
+          guitarNotes[note]
+            .volume(0.3 * volDec)
+            .stereo(balance)
+            .play();
+        }, (i * tempo) / 4);
       });
 
       //random upstrokes for realness
     })();
 }
 
-const [root, third, fifth, seventh] = ['root', 'third', 'fifth', 'seventh'];
+const [root, third, fifth, seventh] = ["root", "third", "fifth", "seventh"];
 
 const openVoicings = {
   A: [0, 0, 2, 2, 2, 0],
@@ -256,9 +278,9 @@ const closedVoicings = {
   Fm: [1, 3, 3, 1, 1, 1],
   Fm7: [1, 3, 1, 1, 1, 1],
   Bb: [1, 1, 3, 3, 3, 1],
-  'A#': [1, 1, 3, 3, 3, 1],
+  "A#": [1, 1, 3, 3, 3, 1],
   Bb7: [1, 1, 3, 1, 3, 1],
-  'A#7': [1, 1, 3, 1, 3, 1],
+  "A#7": [1, 1, 3, 1, 3, 1],
   Bbm: [1, 1, 3, 3, 2, 1],
   Bbm7: [1, 1, 3, 1, 2, 1],
 };
@@ -269,9 +291,9 @@ const closedVoicingChordTones = {
   Fm: [root, fifth, root, third, fifth, root],
   Fm7: [root, fifth, seventh, third, fifth, root],
   Bb: [fifth, root, fifth, root, third, fifth],
-  'A#': [fifth, root, fifth, root, third, fifth],
+  "A#": [fifth, root, fifth, root, third, fifth],
   Bb7: [fifth, root, fifth, seventh, third, fifth],
-  'A#7': [fifth, root, fifth, seventh, third, fifth],
+  "A#7": [fifth, root, fifth, seventh, third, fifth],
   Bbm: [fifth, root, fifth, root, third, fifth],
   Bbm7: [fifth, root, fifth, seventh, third, fifth],
 };
@@ -295,21 +317,21 @@ function buildClosedVoicing(chord) {
   try {
     while (!result && i < 10) {
       if (noteMap[0][i].includes(root)) {
-        result = closedVoicings['F' + qual].map((fret) => fret + (i - 1));
+        result = closedVoicings["F" + qual].map((fret) => fret + (i - 1));
         closedVoicings[chord] = result;
-        closedVoicingChordTones[chord] = closedVoicingChordTones['F' + qual];
+        closedVoicingChordTones[chord] = closedVoicingChordTones["F" + qual];
       }
       if (noteMap[1][i].includes(root)) {
-        result = closedVoicings['Bb' + qual].map((fret) => fret + (i - 1));
+        result = closedVoicings["Bb" + qual].map((fret) => fret + (i - 1));
 
         closedVoicings[chord] = result;
-        closedVoicingChordTones[chord] = closedVoicingChordTones['Bb' + qual];
+        closedVoicingChordTones[chord] = closedVoicingChordTones["Bb" + qual];
       }
       i++;
     }
     return result;
   } catch (error) {
-    return 'that chord is not supported';
+    return "that chord is not supported";
   }
 }
 
@@ -329,7 +351,7 @@ function transposeToCapo(chord, capo) {
   // return getVoicing(newRoot + qual).map((fret) => fret + capo);
 }
 
-const tuning = ['E', 'A', 'D', 'G', 'B', 'ee'];
+const tuning = ["E", "A", "D", "G", "B", "ee"];
 
 export function validateChords(progression) {
   // const progression = getProgression();
@@ -341,11 +363,11 @@ export function validateChords(progression) {
   return flatProg.every((chord, i) => {
     const root = getRoot(chord);
     const qual = getQuality(chord);
-    if (i === 0 && chord === '') {
-      window.alert('There must be a chord on beat 1.');
+    if (i === 0 && chord === "") {
+      window.alert("There must be a chord on beat 1.");
       return false;
     }
-    if (chord === '') {
+    if (chord === "") {
       return true;
     }
     if (!(chromFlat.includes(root) || chromSharp.includes(root))) {
@@ -353,7 +375,7 @@ export function validateChords(progression) {
       return false;
     }
 
-    if (!['', 'm', '7', 'm7'].includes(qual)) {
+    if (!["", "m", "7", "m7"].includes(qual)) {
       window.alert(`Sorry, ${chord} is not supported in this app.`);
       return false;
     }
@@ -373,87 +395,87 @@ export function validateChords(progression) {
 
 const noteMap = [
   [
-    ['E'],
-    ['F'],
-    ['F#', 'Gb'],
-    ['G'],
-    ['G#', 'Ab'],
-    ['A'],
-    ['A#', 'Bb'],
-    ['B'],
-    ['C'],
-    ['C#', 'Db'],
-    ['D'],
-    ['D#', 'Eb'],
+    ["E"],
+    ["F"],
+    ["F#", "Gb"],
+    ["G"],
+    ["G#", "Ab"],
+    ["A"],
+    ["A#", "Bb"],
+    ["B"],
+    ["C"],
+    ["C#", "Db"],
+    ["D"],
+    ["D#", "Eb"],
   ],
   [
-    ['A'],
-    ['A#', 'Bb'],
-    ['B'],
-    ['C'],
-    ['C#', 'Db'],
-    ['D'],
-    ['D#', 'Eb'],
-    ['E'],
-    ['F'],
-    ['F#', 'Gb'],
-    ['G'],
-    ['G#', 'Ab'],
+    ["A"],
+    ["A#", "Bb"],
+    ["B"],
+    ["C"],
+    ["C#", "Db"],
+    ["D"],
+    ["D#", "Eb"],
+    ["E"],
+    ["F"],
+    ["F#", "Gb"],
+    ["G"],
+    ["G#", "Ab"],
   ],
   [
-    ['D'],
-    ['D#', 'Eb'],
-    ['E'],
-    ['F'],
-    ['F#', 'Gb'],
-    ['G'],
-    ['G#', 'Ab'],
-    ['A'],
-    ['A#', 'Bb'],
-    ['B'],
-    ['C'],
-    ['C#', 'Db'],
+    ["D"],
+    ["D#", "Eb"],
+    ["E"],
+    ["F"],
+    ["F#", "Gb"],
+    ["G"],
+    ["G#", "Ab"],
+    ["A"],
+    ["A#", "Bb"],
+    ["B"],
+    ["C"],
+    ["C#", "Db"],
   ],
   [
-    ['G'],
-    ['G#', 'Ab'],
-    ['A'],
-    ['A#', 'Bb'],
-    ['B'],
-    ['C'],
-    ['C#', 'Db'],
-    ['D'],
-    ['D#', 'Eb'],
-    ['E'],
-    ['F'],
-    ['F#', 'Gb'],
+    ["G"],
+    ["G#", "Ab"],
+    ["A"],
+    ["A#", "Bb"],
+    ["B"],
+    ["C"],
+    ["C#", "Db"],
+    ["D"],
+    ["D#", "Eb"],
+    ["E"],
+    ["F"],
+    ["F#", "Gb"],
   ],
   [
-    ['B'],
-    ['C'],
-    ['C#', 'Db'],
-    ['D'],
-    ['D#', 'Eb'],
-    ['E'],
-    ['F'],
-    ['F#', 'Gb'],
-    ['G'],
-    ['G#', 'Ab'],
-    ['A'],
-    ['A#', 'Bb'],
+    ["B"],
+    ["C"],
+    ["C#", "Db"],
+    ["D"],
+    ["D#", "Eb"],
+    ["E"],
+    ["F"],
+    ["F#", "Gb"],
+    ["G"],
+    ["G#", "Ab"],
+    ["A"],
+    ["A#", "Bb"],
   ],
   [
-    ['E'],
-    ['F'],
-    ['F#', 'Gb'],
-    ['G'],
-    ['G#', 'Ab'],
-    ['A'],
-    ['A#', 'Bb'],
-    ['B'],
-    ['C'],
-    ['C#', 'Db'],
-    ['D'],
-    ['D#', 'Eb'],
+    ["E"],
+    ["F"],
+    ["F#", "Gb"],
+    ["G"],
+    ["G#", "Ab"],
+    ["A"],
+    ["A#", "Bb"],
+    ["B"],
+    ["C"],
+    ["C#", "Db"],
+    ["D"],
+    ["D#", "Eb"],
   ],
 ];

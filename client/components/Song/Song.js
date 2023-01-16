@@ -1,15 +1,16 @@
-import React, { useState, useEffect } from 'react';
-import styled from 'styled-components';
-import { useDispatch, useSelector } from 'react-redux';
-import { useParams } from 'react-router-dom';
-import { editTitle, selectSong } from '../../store/songSlice';
-import { CenteredDiv, PShadow } from '../styledDivs';
-import Measure from './Measure';
-import Chart from './Chart';
-import ControlBar from '../FooterControls/ControlBar';
-import Mixer from '../UI/Mixer/Mixer';
-import CapoModal from '../UI/CapoModal';
-import { flattenSong } from '../../audioFunctions/play';
+import React, { useState, useEffect } from "react";
+import styled from "styled-components";
+import { useDispatch, useSelector } from "react-redux";
+import { useParams } from "react-router-dom";
+import { editTitle, selectSong } from "../../store/songSlice";
+import { CenteredDiv, PShadow } from "../styledDivs";
+import Measure from "./Measure";
+import Chart from "./Chart";
+import ControlBar from "../FooterControls/ControlBar";
+import Mixer from "../UI/Mixer/Mixer";
+import CapoModal from "../UI/CapoModal";
+import { flattenSong } from "../../audioFunctions/play";
+import { paperClasses } from "@mui/material";
 
 const Song = () => {
   const dispatch = useDispatch();
@@ -19,6 +20,7 @@ const Song = () => {
   );
   const { toggleMixerModal } = useSelector((state) => state.mixer);
   const { toggleCapoModal } = useSelector((state) => state.ui);
+  const { passes } = useSelector((state) => state.songs);
   //work on this useEffect unnecessay selectSongs
   useEffect(() => {
     allSongs.length && dispatch(selectSong(+params.songId));
@@ -33,22 +35,38 @@ const Song = () => {
       {toggleMixerModal && <Mixer />}
       {toggleCapoModal && <CapoModal />}
 
-      <CenteredDiv style={{ flexDirection: 'column' }}>
+      <CenteredDiv style={{ flexDirection: "column" }}>
         {editMode ? (
           <input
             style={{
-              marginTop: '20px',
-              marginBottom: '20px',
-              fontSize: '20px',
-              height: '40px',
+              marginTop: "20px",
+              marginBottom: "20px",
+              fontSize: "20px",
+              height: "40px",
             }}
             value={song.title}
             onChange={(e) => dispatch(editTitle(e.target.value))}
           />
         ) : (
-          <PShadow style={{ marginTop: '20px', marginBottom: '20px' }}>
-            {song && song.title}
-          </PShadow>
+          <>
+            <PShadow style={{ marginTop: "20px", marginBottom: "20px" }}>
+              {song && song.title}
+            </PShadow>
+            <div style={{ display: "flex", flexDirection: "row" }}>
+              {passes.map((pass, i) => {
+                return (
+                  <button
+                    onClick={() => {
+                      const audio = new Audio(pass);
+                      audio.play();
+                    }}
+                  >
+                    {i + 1}
+                  </button>
+                );
+              })}
+            </div>
+          </>
         )}
 
         <Chart />

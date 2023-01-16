@@ -2,9 +2,15 @@
 import store from "../store";
 import { guitarPlay } from "./guitar";
 import { mandoPlay } from "./mando";
-import { advancePosition, playSong } from "../store/songSlice";
+import {
+  advancePosition,
+  playSong,
+  pushPasses,
+  toggleRec,
+} from "../store/songSlice";
 import { buildGuitarPlayroll } from "./guitar";
 import { buildMandoPlayroll } from "./mando";
+
 let flattenedSong;
 
 export function flattenSong(song) {
@@ -43,6 +49,38 @@ export function play() {
     store.dispatch(advancePosition());
     expectedTime += 60000 / store.getState().songs.tempo;
   }
+}
+
+let mediaRecorders = [];
+
+export function record() {
+  navigator.mediaDevices.getUserMedia({ audio: true }).then((stream) => {
+    mediaRecorders.push(new MediaRecorder(stream));
+    mediaRecorders[mediaRecorders.length - 1].start();
+
+    const audioChunks = [];
+    mediaRecorders[mediaRecorders.length - 1].addEventListener(
+      "dataavailable",
+      (event) => {
+        audioChunks.push(event.data);
+      }
+    );
+
+    mediaRecorders[mediaRecorders.length - 1].addEventListener("stop", () => {
+      const audioBlob = new Blob(audioChunks);
+      const audioUrl = URL.createObjectURL(audioBlob);
+      store.dispatch(pushPasses(audioUrl));
+    });
+  });
+}
+export function stopRec() {
+  mediaRecorders.length > 0 && mediaRecorders[mediaRecorders.length - 1].stop();
+}
+///????don't work :(
+export function stopAllRec() {
+  mediaRecorders?.forEach((r) => {
+    r.stop();
+  });
 }
 // const sound = new Howl({
 //   src: ["https://mvbguitarsamples.s3.us-east-2.amazonaws.com/guitar/E5.mp3"],

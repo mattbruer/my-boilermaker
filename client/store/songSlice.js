@@ -1,26 +1,47 @@
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import axios from 'axios';
+import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import axios from "axios";
 
-import { sendToken } from './helperFunctions';
-import { play, initExpectedTime } from '../audioFunctions/play';
+import { sendToken } from "./helperFunctions";
+import {
+  play,
+  initExpectedTime,
+  record,
+  stopRec,
+  stopAllRec,
+} from "../audioFunctions/play";
 
-//i made tis a thunk because it has side effects...
-export const playSong = createAsyncThunk('song/playSong', (_, thunkAPI) => {
+//i made these thunks because of side effects...??
+export const playSong = createAsyncThunk("song/playSong", (_, thunkAPI) => {
   thunkAPI.dispatch(togglePlay(true));
   initExpectedTime();
   play();
 });
 
-export const stopSong = createAsyncThunk('song/stopSong', (_, thunkAPI) => {
+export const advancePosition = createAsyncThunk(
+  "song/advancePosition",
+  (_, thunkAPI) => {
+    const { getState, dispatch } = thunkAPI;
+    dispatch(positionAdvanced());
+
+    if (getState().songs.recordingArmed && getState().songs.position === 1) {
+      stopRec();
+      record();
+      dispatch(toggleRec(true));
+    }
+  }
+);
+
+export const stopSong = createAsyncThunk("song/stopSong", (_, thunkAPI) => {
   thunkAPI.dispatch(togglePlay(false));
   thunkAPI.dispatch(resetPosition());
+  stopAllRec();
 });
 
 export const saveChanges = createAsyncThunk(
-  'song/saveChanges',
+  "song/saveChanges",
   async (newSong, thunkAPI) => {
     try {
-      const { data } = await axios.put('/api/songs', newSong, sendToken());
+      const { data } = await axios.put("/api/songs", newSong, sendToken());
       thunkAPI.dispatch(toggleEditMode(!toggleEditMode));
     } catch (error) {
       console.log(error);
@@ -29,10 +50,10 @@ export const saveChanges = createAsyncThunk(
 );
 
 export const newSong = createAsyncThunk(
-  'song/newSong',
+  "song/newSong",
   async (formValues, thunkAPI) => {
     try {
-      const { data } = await axios.post('/api/songs', formValues, sendToken());
+      const { data } = await axios.post("/api/songs", formValues, sendToken());
       data.measures = JSON.parse(data.measures);
       thunkAPI.dispatch(addSong(data));
     } catch (error) {
@@ -42,10 +63,10 @@ export const newSong = createAsyncThunk(
 );
 
 export const loadUserSongs = createAsyncThunk(
-  'song/loadUserSongs',
+  "song/loadUserSongs",
   async (_, thunkAPI) => {
     try {
-      const { data } = await axios.get('/api/songs', sendToken());
+      const { data } = await axios.get("/api/songs", sendToken());
       data.forEach((song) => {
         song.measures = JSON.parse(song.measures);
       });
@@ -74,10 +95,13 @@ const initialState = {
   validChords: false,
   capo: 0,
   flattenedSong: [],
+  isRecording: false,
+  recordingArmed: false,
+  passes: [],
 };
 
 const songSlice = createSlice({
-  name: 'song',
+  name: "song",
   initialState,
   reducers: {
     setAllSongs: (state, action) => {
@@ -85,6 +109,15 @@ const songSlice = createSlice({
     },
     addSong: (state, action) => {
       state.allSongs.push(action.payload);
+    },
+    armRecording: (state, action) => {
+      state.recordingArmed = true;
+    },
+    toggleRec: (state, action) => {
+      state.isRecording = action.payload;
+    },
+    pushPasses: (state, action) => {
+      state.passes.push(action.payload);
     },
     toggleEditMode: (state, action) => {
       state.editMode = action.payload;
@@ -109,7 +142,7 @@ const songSlice = createSlice({
       const song = state.allSongs.find(
         (song) => song.id === state.selectedSong
       );
-      song.measures.push(['', '']);
+      song.measures.push(["", ""]);
     },
     removeMeasure: (state, action) => {
       const song = state.allSongs.find(
@@ -125,7 +158,7 @@ const songSlice = createSlice({
     togglePlay: (state, action) => {
       state.isPlaying = action.payload;
     },
-    advancePosition: (state, action) => {
+    positionAdvanced: (state, action) => {
       state.position =
         state.position === state.measures.length * 4 - 1
           ? 0
@@ -154,9 +187,12 @@ export const {
   addMeasure,
   removeMeasure,
   changeTempo,
-  advancePosition,
+  positionAdvanced,
   togglePlay,
   resetPosition,
   setCapo,
+  toggleRec,
+  armRecording,
+  pushPasses,
 } = songSlice.actions;
 export default songSlice.reducer;

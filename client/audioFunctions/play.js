@@ -1,15 +1,15 @@
 // import store from "../store";
-import store from "../store";
-import { guitarPlay } from "./guitar";
-import { mandoPlay } from "./mando";
+import store from '../store';
+import { guitarPlay } from './guitar';
+import { mandoPlay } from './mando';
 import {
   advancePosition,
   playSong,
   pushPasses,
   toggleRec,
-} from "../store/songSlice";
-import { buildGuitarPlayroll } from "./guitar";
-import { buildMandoPlayroll } from "./mando";
+} from '../store/songSlice';
+import { buildGuitarPlayroll } from './guitar';
+import { buildMandoPlayroll } from './mando';
 
 let flattenedSong;
 
@@ -19,7 +19,7 @@ export function flattenSong(song) {
     newMeasures.push(m[0], m[1]);
   });
   newMeasures.forEach((chord, i) => {
-    if (chord === "") {
+    if (chord === '') {
       newMeasures[i] = newMeasures[i - 1];
     }
   });
@@ -30,16 +30,18 @@ export function flattenSong(song) {
 }
 
 let expectedTime;
-let prevTime;
+
 export function getExpectedTime() {
   return expectedTime;
 }
+
 export function initExpectedTime() {
   expectedTime = Date.now() + 60000 / store.getState().songs.tempo;
 }
 export function play() {
   const isPlaying = store.getState().songs.isPlaying;
   const now = Date.now();
+
   if (isPlaying) {
     guitarPlay();
     mandoPlay();
@@ -54,24 +56,32 @@ export function play() {
 let mediaRecorders = [];
 
 export function record() {
-  navigator.mediaDevices.getUserMedia({ audio: true }).then((stream) => {
-    mediaRecorders.push(new MediaRecorder(stream));
-    mediaRecorders[mediaRecorders.length - 1].start();
+  navigator.mediaDevices
+    .getUserMedia({
+      audio: { echoCancellation: false },
+      video: false,
+    })
+    .then((stream) => {
+      const recorder = new MediaRecorder(stream);
 
-    const audioChunks = [];
-    mediaRecorders[mediaRecorders.length - 1].addEventListener(
-      "dataavailable",
-      (event) => {
-        audioChunks.push(event.data);
-      }
-    );
+      mediaRecorders.push(recorder);
+      mediaRecorders[mediaRecorders.length - 1].start();
 
-    mediaRecorders[mediaRecorders.length - 1].addEventListener("stop", () => {
-      const audioBlob = new Blob(audioChunks);
-      const audioUrl = URL.createObjectURL(audioBlob);
-      store.dispatch(pushPasses(audioUrl));
+      const audioChunks = [];
+      mediaRecorders[mediaRecorders.length - 1].addEventListener(
+        'dataavailable',
+        (event) => {
+          audioChunks.push(event.data);
+        }
+      );
+
+      mediaRecorders[mediaRecorders.length - 1].addEventListener('stop', () => {
+        const audioBlob = new Blob(audioChunks);
+        const audioUrl = URL.createObjectURL(audioBlob);
+        store.dispatch(pushPasses(audioUrl));
+        console.log(new Audio(audioUrl));
+      });
     });
-  });
 }
 export function stopRec() {
   mediaRecorders.length > 0 && mediaRecorders[mediaRecorders.length - 1].stop();

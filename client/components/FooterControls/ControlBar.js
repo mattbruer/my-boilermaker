@@ -1,6 +1,6 @@
-import React, { useEffect } from "react";
-import styled from "styled-components";
-import { CenteredDiv, PShadow } from "../styledDivs";
+import React, { useEffect } from 'react';
+import styled from 'styled-components';
+import { CenteredDiv, PShadow } from '../styledDivs';
 import {
   Edit,
   PlayArrowOutlined,
@@ -9,16 +9,16 @@ import {
   Add,
   StopOutlined,
   Remove,
-} from "@mui/icons-material";
+} from '@mui/icons-material';
 
-import TempoSlider from "./TempoSlider";
-import { toggleMixer } from "../../store/mixerSlice";
-import { toggleCapoModal, disablePlay } from "../../store/uiSlice";
+import TempoSlider from './TempoSlider';
+import { toggleMixer } from '../../store/mixerSlice';
+import { toggleCapoModal, disablePlay } from '../../store/uiSlice';
 import {
   validateChords,
   guitarCheck,
   guitarPlay,
-} from "../../audioFunctions/guitar";
+} from '../../audioFunctions/guitar';
 import {
   toggleEditMode,
   addMeasure,
@@ -28,10 +28,10 @@ import {
   stopSong,
   startRecord,
   armRecording,
-} from "../../store/songSlice";
-import Button from "@mui/material/Button";
-import { useDispatch, useSelector } from "react-redux";
-import { flattenSong, stopRec } from "../../audioFunctions/play";
+} from '../../store/songSlice';
+import Button from '@mui/material/Button';
+import { useDispatch, useSelector } from 'react-redux';
+import { flattenSong, stopAllRec, stopRec } from '../../audioFunctions/play';
 
 const ControlBar = () => {
   const dispatch = useDispatch();
@@ -48,7 +48,7 @@ const ControlBar = () => {
 
   return (
     <Container>
-      <CenteredDiv style={{ justifyContent: "space-around" }}>
+      <CenteredDiv style={{ justifyContent: 'space-around' }}>
         {editMode ? (
           <>
             <Button
@@ -87,8 +87,8 @@ const ControlBar = () => {
             </Button>
           </>
         ) : (
-          <CenteredDiv style={{ flexDirection: "column" }}>
-            <CenteredDiv style={{ margin: "10px" }}>
+          <CenteredDiv style={{ flexDirection: 'column' }}>
+            <CenteredDiv style={{ margin: '10px' }}>
               <Button
                 disabled={isPlaying}
                 style={buttonStyle}
@@ -105,8 +105,9 @@ const ControlBar = () => {
                 onClick={() => {
                   isPlaying
                     ? (() => {
-                        stopRec();
                         dispatch(stopSong());
+
+                        stopAllRec();
                       })()
                     : (() => {
                         dispatch(playSong());
@@ -138,11 +139,11 @@ const ControlBar = () => {
 
             <CenteredDiv
               style={{
-                width: "90vw",
-                marginBottom: "5px",
+                width: '90vw',
+                marginBottom: '5px',
               }}
             >
-              <p style={{ fontSize: "20px", margin: "15px", color: "white" }}>
+              <p style={{ fontSize: '20px', margin: '15px', color: 'white' }}>
                 Tempo
               </p>
               <TempoSlider />
@@ -169,9 +170,9 @@ const Container = styled.div`
 `;
 
 const buttonStyle = {
-  backgroundColor: "white",
-  boxShadow: "5px -2px 10px black",
-  height: "40px",
-  width: "100%",
-  margin: "0 2vw 0 2vw",
+  backgroundColor: 'white',
+  boxShadow: '5px -2px 10px black',
+  height: '40px',
+  width: '100%',
+  margin: '0 2vw 0 2vw',
 };

@@ -12,7 +12,7 @@ const Song = db.define('song', {
   },
   measures: {
     type: Sequelize.STRING,
-    defaultValue: '[["C","G"]]',
+    defaultValue: '[]',
   },
   timeSignature: {
     type: Sequelize.ARRAY(Sequelize.INTEGER),

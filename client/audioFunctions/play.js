@@ -1,5 +1,6 @@
 // import store from "../store";
 import store from '../store';
+import { Howl } from 'howler';
 import { guitarPlay } from './guitar';
 import { mandoPlay } from './mando';
 import {
@@ -45,10 +46,12 @@ export function play() {
   if (isPlaying) {
     guitarPlay();
     mandoPlay();
+
     setTimeout(() => {
       isPlaying && play();
     }, expectedTime - now);
     store.dispatch(advancePosition());
+
     expectedTime += 60000 / store.getState().songs.tempo;
   }
 }
@@ -56,6 +59,21 @@ export function play() {
 let mediaRecorders = [];
 
 export function record() {
+  mediaRecorders[mediaRecorders.length - 1].start();
+  if (mediaRecorders[mediaRecorders.length - 2]) {
+    mediaRecorders[mediaRecorders.length - 2].stop();
+  }
+}
+
+const passes = [];
+
+export function getPasses() {
+  if (passes.length > 0) {
+    return passes;
+  }
+}
+
+export function prepareToRecord() {
   navigator.mediaDevices
     .getUserMedia({
       audio: { echoCancellation: false },
@@ -64,8 +82,15 @@ export function record() {
     .then((stream) => {
       const recorder = new MediaRecorder(stream);
 
+      recorder.addEventListener('stop', () => {
+        const audioBlob = new Blob(audioChunks);
+        const audioUrl = URL.createObjectURL(audioBlob);
+        store.dispatch(pushPasses(audioUrl));
+
+        passes.push(pass);
+        stream.getTracks().forEach((track) => track.stop());
+      });
       mediaRecorders.push(recorder);
-      mediaRecorders[mediaRecorders.length - 1].start();
 
       const audioChunks = [];
       mediaRecorders[mediaRecorders.length - 1].addEventListener(
@@ -74,22 +99,19 @@ export function record() {
           audioChunks.push(event.data);
         }
       );
-
-      mediaRecorders[mediaRecorders.length - 1].addEventListener('stop', () => {
-        const audioBlob = new Blob(audioChunks);
-        const audioUrl = URL.createObjectURL(audioBlob);
-        store.dispatch(pushPasses(audioUrl));
-        console.log(new Audio(audioUrl));
-      });
     });
 }
 export function stopRec() {
-  mediaRecorders.length > 0 && mediaRecorders[mediaRecorders.length - 1].stop();
+  if (mediaRecorders.length > 0) {
+    mediaRecorders[mediaRecorders.length - 1].stop();
+  }
 }
 ///????don't work :(
 export function stopAllRec() {
   mediaRecorders?.forEach((r) => {
-    r.stop();
+    if (r.state === 'recording') {
+      r.stop();
+    }
   });
 }
 // const sound = new Howl({

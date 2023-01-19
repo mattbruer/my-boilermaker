@@ -1,14 +1,15 @@
 import React from 'react';
 import styled from 'styled-components';
 import { useSelector, useDispatch } from 'react-redux';
-import { useParams } from 'react-router-dom';
-import { PShadow } from '../styledDivs';
+
 import { editChord } from '../../store/songSlice';
-import { checkFirst } from '../../store/helperFunctions';
+import { transposeToCapo } from '../../audioFunctions/guitar';
 
 const Measure = ({ measureNumber }) => {
   const dispatch = useDispatch();
-  const { measures, editMode, position } = useSelector((state) => state.songs);
+  const { measures, editMode, position, capo } = useSelector(
+    (state) => state.songs
+  );
 
   const measure = measures[measureNumber];
 
@@ -48,8 +49,38 @@ const Measure = ({ measureNumber }) => {
         </>
       ) : (
         <>
-          <p style={{ width: '50%', marginLeft: '12px' }}>{measure[0]}</p>
-          <p>{measure[1]}</p>
+          <div
+            style={{ display: 'flex', flexDirection: 'column', width: '50%' }}
+          >
+            {capo !== 0 && (
+              <p
+                style={{
+                  marginLeft: '12px',
+                  fontSize: '18px',
+                  color: 'grey',
+                }}
+              >
+                {measure[0] && transposeToCapo(measure[0], capo)}
+              </p>
+            )}
+            <p style={{ marginLeft: '12px' }}>{measure[0]}</p>
+          </div>
+          <div
+            style={{ display: 'flex', flexDirection: 'column', width: '50%' }}
+          >
+            {capo !== 0 && (
+              <p
+                style={{
+                  marginLeft: '12px',
+                  fontSize: '18px',
+                  color: 'grey',
+                }}
+              >
+                {measure[1] && transposeToCapo(measure[1], capo)}
+              </p>
+            )}
+            <p style={{ width: '50%', marginLeft: '12px' }}>{measure[1]}</p>
+          </div>
         </>
       )}
     </MeasureContainer>

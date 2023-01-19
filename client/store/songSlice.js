@@ -1,47 +1,55 @@
-import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import axios from "axios";
-
-import { sendToken } from "./helperFunctions";
+import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import axios from 'axios';
+import { Howl } from 'howler';
+import { sendToken } from './helperFunctions';
 import {
   play,
   initExpectedTime,
   record,
   stopRec,
   stopAllRec,
-} from "../audioFunctions/play";
+  prepareToRecord,
+  getPasses,
+} from '../audioFunctions/play';
 
 //i made these thunks because of side effects...??
-export const playSong = createAsyncThunk("song/playSong", (_, thunkAPI) => {
-  thunkAPI.dispatch(togglePlay(true));
+let passes;
+export const playSong = createAsyncThunk('song/playSong', (_, thunkAPI) => {
+  passes = getPasses();
   initExpectedTime();
+  passes && passes[0].play();
+  thunkAPI.dispatch(togglePlay(true));
   play();
 });
 
 export const advancePosition = createAsyncThunk(
-  "song/advancePosition",
+  'song/advancePosition',
   (_, thunkAPI) => {
     const { getState, dispatch } = thunkAPI;
     dispatch(positionAdvanced());
-
-    if (getState().songs.recordingArmed && getState().songs.position === 1) {
-      stopRec();
-      record();
-      dispatch(toggleRec(true));
+    const { position, recordingArmed } = getState().songs;
+    if (recordingArmed && position === 0) {
+      prepareToRecord();
+    }
+    if (position === 1) {
+      if (recordingArmed) {
+        record();
+      }
     }
   }
 );
 
-export const stopSong = createAsyncThunk("song/stopSong", (_, thunkAPI) => {
+export const stopSong = createAsyncThunk('song/stopSong', (_, thunkAPI) => {
   thunkAPI.dispatch(togglePlay(false));
   thunkAPI.dispatch(resetPosition());
   stopAllRec();
 });
 
 export const saveChanges = createAsyncThunk(
-  "song/saveChanges",
+  'song/saveChanges',
   async (newSong, thunkAPI) => {
     try {
-      const { data } = await axios.put("/api/songs", newSong, sendToken());
+      const { data } = await axios.put('/api/songs', newSong, sendToken());
       thunkAPI.dispatch(toggleEditMode(!toggleEditMode));
     } catch (error) {
       console.log(error);
@@ -50,10 +58,10 @@ export const saveChanges = createAsyncThunk(
 );
 
 export const newSong = createAsyncThunk(
-  "song/newSong",
+  'song/newSong',
   async (formValues, thunkAPI) => {
     try {
-      const { data } = await axios.post("/api/songs", formValues, sendToken());
+      const { data } = await axios.post('/api/songs', formValues, sendToken());
       data.measures = JSON.parse(data.measures);
       thunkAPI.dispatch(addSong(data));
     } catch (error) {
@@ -63,10 +71,10 @@ export const newSong = createAsyncThunk(
 );
 
 export const loadUserSongs = createAsyncThunk(
-  "song/loadUserSongs",
+  'song/loadUserSongs',
   async (_, thunkAPI) => {
     try {
-      const { data } = await axios.get("/api/songs", sendToken());
+      const { data } = await axios.get('/api/songs', sendToken());
       data.forEach((song) => {
         song.measures = JSON.parse(song.measures);
       });
@@ -101,7 +109,7 @@ const initialState = {
 };
 
 const songSlice = createSlice({
-  name: "song",
+  name: 'song',
   initialState,
   reducers: {
     setAllSongs: (state, action) => {
@@ -142,7 +150,7 @@ const songSlice = createSlice({
       const song = state.allSongs.find(
         (song) => song.id === state.selectedSong
       );
-      song.measures.push(["", ""]);
+      song.measures.push(['', '']);
     },
     removeMeasure: (state, action) => {
       const song = state.allSongs.find(
@@ -157,6 +165,9 @@ const songSlice = createSlice({
     },
     togglePlay: (state, action) => {
       state.isPlaying = action.payload;
+      if (!action.payload) {
+        state.recordingArmed = false;
+      }
     },
     positionAdvanced: (state, action) => {
       state.position =

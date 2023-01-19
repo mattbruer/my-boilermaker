@@ -24,31 +24,43 @@ const AuthForm = (props) => {
       style={{
         marginTop: '65px',
         display: 'flex',
+        flexDirection: 'column',
         justifyContent: 'center',
         alignItems: 'center',
         height: 'calc(100vh - 64px)',
+        backgroundColor: '#0a98f7',
       }}
     >
       <MuiModal open={open} handleClose={handleClose} />
-      <form onSubmit={handleSubmit} name={name}>
-        <div>
+      <form
+        style={{
+          border: '4px groove grey',
+          borderRadius: '5px',
+          backgroundColor: 'white',
+          padding: '20px',
+          textAlign: 'left',
+        }}
+        onSubmit={handleSubmit}
+        name={name}
+      >
+        <div style={{ display: 'flex', flexDirection: 'column' }}>
           <label htmlFor="email">
             <small>Email</small>
           </label>
           <input name="email" type="text" />
         </div>
-        <div>
+        <div style={{ display: 'flex', flexDirection: 'column' }}>
           <label htmlFor="password">
             <small>Password</small>
           </label>
           <input name="password" type="password" />
         </div>
-        <div>
+        <div style={{ textAlign: 'center', marginTop: '15px' }}>
           <button type="submit">{displayName}</button>
         </div>
         {error && error.response && <div> {error.response.data} </div>}
       </form>
-      <div>
+      <div style={{ backgroundColor: 'white', margin: '5px' }}>
         <Button onClick={handleOpen}>Forgot Password?</Button>
       </div>
     </div>

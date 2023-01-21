@@ -69,7 +69,6 @@ function populateVoicings() {
         voicings[newChord] = newShape;
       }
     }
-    console.log(voicings);
   });
 }
 populateVoicings();

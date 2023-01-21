@@ -13,6 +13,48 @@ import { buildGuitarPlayroll } from './guitar';
 import { buildMandoPlayroll } from './mando';
 
 let flattenedSong;
+const AudioContext = window.AudioContext || window.webkitAudioContext;
+const audioContext = new AudioContext({
+  sampleRate: 96000,
+  latencyHint: 0,
+});
+let source;
+let stream2;
+
+function monitor() {
+  navigator.mediaDevices
+    .getUserMedia({
+      audio: {
+        autoGainControl: false,
+        echoCancellation: false,
+        noiseSuppression: false,
+        // latency: { exact: 0.003 },
+      },
+    })
+    .then((stream) => {
+      stream2 = stream;
+      source = audioContext.createMediaStreamSource(stream2);
+      source.connect(audioContext.destination);
+    });
+}
+function checkHeadphones() {
+  navigator.mediaDevices.enumerateDevices().then((devices) => {
+    // Check the connected devices
+    const headphones = devices.find((d) => d.label.includes('Headphones'));
+    if (headphones) {
+      monitor();
+    } else {
+      stream2?.getTracks().forEach((t) => t.stop());
+    }
+  });
+}
+
+checkHeadphones();
+
+navigator.mediaDevices.addEventListener('devicechange', () => {
+  console.log('it changed');
+  checkHeadphones();
+});
 
 export function flattenSong(song) {
   const newMeasures = [];
@@ -31,27 +73,43 @@ export function flattenSong(song) {
 }
 
 let expectedTime;
-
+let prevTime;
 export function getExpectedTime() {
   return expectedTime;
+}
+export function getPrevTime() {
+  return prevTime;
 }
 
 export function initExpectedTime() {
   expectedTime = Date.now() + 60000 / store.getState().songs.tempo;
 }
 export function play() {
-  const isPlaying = store.getState().songs.isPlaying;
+  const { isPlaying, position, selectedPass, recordingArmed } =
+    store.getState().songs;
+
   const now = Date.now();
+  if (!isPlaying) {
+    passes.forEach((p, i) => {
+      p.stop();
+    });
+  }
 
   if (isPlaying) {
     guitarPlay();
     mandoPlay();
+    if (position === 0 && passes[0] && !recordingArmed) {
+      passes.forEach((p, i) => {
+        p.volume(selectedPass === i ? 1 : 0).play();
+      });
+    }
+
+    store.dispatch(advancePosition());
 
     setTimeout(() => {
       isPlaying && play();
     }, expectedTime - now);
-    store.dispatch(advancePosition());
-
+    prevTime = expectedTime;
     expectedTime += 60000 / store.getState().songs.tempo;
   }
 }
@@ -76,8 +134,12 @@ export function getPasses() {
 export function prepareToRecord() {
   navigator.mediaDevices
     .getUserMedia({
-      audio: { echoCancellation: false },
-      video: false,
+      audio: {
+        autoGainControl: false,
+        echoCancellation: false,
+        noiseSuppression: false,
+        // latency: { exact: 0.003 },
+      },
     })
     .then((stream) => {
       const recorder = new MediaRecorder(stream);
@@ -87,7 +149,8 @@ export function prepareToRecord() {
         const audioUrl = URL.createObjectURL(audioBlob);
         store.dispatch(pushPasses(audioUrl));
 
-        passes.push(pass);
+        passes.push(new Howl({ src: [audioUrl], html5: true }));
+
         stream.getTracks().forEach((track) => track.stop());
       });
       mediaRecorders.push(recorder);

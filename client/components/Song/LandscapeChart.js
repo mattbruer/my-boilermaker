@@ -98,7 +98,8 @@ const Container = styled.div`
   overflow-x: ${(props) => (props.isPlaying ? 'hidden' : 'scroll')};
   padding: 20px;
   animation-name: ${(props) => scrollAnimation(props.position, props.len)};
-  animation-duration: ${(props) =>
-    props.isPlaying ? `${(getExpectedTime() - Date.now()) / 2}ms` : '0s'};
+  animation-duration: ${(props) => {
+    return props.isPlaying ? `${getPrevTime() - Date.now() + 10}ms` : '0s';
+  }};
   animation-timing-function: linear;
 `;

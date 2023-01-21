@@ -1,6 +1,7 @@
 import { Howl } from 'howler';
 import store from '../store';
 import { disablePlay } from '../store/uiSlice';
+import { getExpectedTime } from './play';
 import { chromSharp, chromFlat, getRoot, getQuality } from './chordScales';
 //memoization...sorta?
 const guitarNotes = {};
@@ -52,7 +53,7 @@ function hammerOn(choice) {
   setTimeout(() => {
     guitarNotes[hammerNote].fade(0.8 * volDec, 0, 10);
     guitarNotes[choice].volume(0.8 * volDec);
-  }, 60000 / store.getState().songs.tempo / 2);
+  }, (getExpectedTime() - Date.now()) / 2);
   guitarNotes[hammerNote]
     .volume(0.8 * volDec)
     .stereo(store.getState().mixer.balance['guitar'] / 100)
@@ -211,6 +212,7 @@ export function guitarPlay() {
   pos % 2 !== 0 &&
     tempo <= 192 &&
     (() => {
+      //random upstrokes for realness
       Math.floor(Math.random() * 10) === 1 &&
         setTimeout(() => {
           silenceRingingNotes(guitarNotes[reverse[0]]);
@@ -218,7 +220,7 @@ export function guitarPlay() {
             .volume(0.3 * volDec)
             .stereo(balance)
             .play();
-        }, 60000 / tempo / 2);
+        }, (getExpectedTime() - Date.now()) / 2);
       //strum
       playroll[pos].forEach((note, i) => {
         setTimeout(() => {
@@ -229,8 +231,6 @@ export function guitarPlay() {
             .play();
         }, (i * tempo) / 4);
       });
-
-      //random upstrokes for realness
     })();
 }
 

@@ -10,6 +10,7 @@ import {
   stopAllRec,
   prepareToRecord,
   getPasses,
+  audioContext,
 } from '../audioFunctions/play';
 
 //i made these thunks because of side effects...??
@@ -29,12 +30,14 @@ export const advancePosition = createAsyncThunk(
 
     dispatch(positionAdvanced());
     const { position, recordingArmed } = getState().songs;
+
     if (recordingArmed && position === 0) {
       prepareToRecord();
     }
     if (position === 1) {
       if (recordingArmed) {
         record();
+        console.log('started rec=>', Date.now());
       }
     }
   }

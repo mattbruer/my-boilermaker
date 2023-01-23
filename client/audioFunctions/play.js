@@ -14,28 +14,25 @@ import { buildMandoPlayroll } from './mando';
 
 let flattenedSong;
 const AudioContext = window.AudioContext || window.webkitAudioContext;
-const audioContext = new AudioContext({
-  sampleRate: 96000,
+export const audioContext = new AudioContext({
+  sampleRate: 44100,
   latencyHint: 0,
 });
-let source;
-let stream2;
 
-function monitor() {
-  navigator.mediaDevices
-    .getUserMedia({
-      audio: {
-        autoGainControl: false,
-        echoCancellation: false,
-        noiseSuppression: false,
-        // latency: { exact: 0.003 },
-      },
-    })
-    .then((stream) => {
-      stream2 = stream;
-      source = audioContext.createMediaStreamSource(stream2);
-      source.connect(audioContext.destination);
-    });
+let source;
+let stream;
+async function monitor() {
+  stream = await navigator.mediaDevices.getUserMedia({
+    audio: {
+      autoGainControl: false,
+      echoCancellation: false,
+      noiseSuppression: false,
+      // latency: { exact: 0.003 },
+    },
+  });
+
+  source = audioContext.createMediaStreamSource(stream);
+  source.connect(audioContext.destination);
 }
 function checkHeadphones() {
   navigator.mediaDevices.enumerateDevices().then((devices) => {
@@ -44,7 +41,7 @@ function checkHeadphones() {
     if (headphones) {
       monitor();
     } else {
-      stream2?.getTracks().forEach((t) => t.stop());
+      stream?.getTracks().forEach((t) => t.stop());
     }
   });
 }
@@ -52,7 +49,6 @@ function checkHeadphones() {
 checkHeadphones();
 
 navigator.mediaDevices.addEventListener('devicechange', () => {
-  console.log('it changed');
   checkHeadphones();
 });
 
@@ -84,23 +80,53 @@ export function getPrevTime() {
 export function initExpectedTime() {
   expectedTime = Date.now() + 60000 / store.getState().songs.tempo;
 }
+
+const gains = [];
+const sources = [];
+const analyserArr = [];
+
 export function play() {
+  const now = Date.now();
+
   const { isPlaying, position, selectedPass, recordingArmed } =
     store.getState().songs;
 
-  const now = Date.now();
   if (!isPlaying) {
-    passes.forEach((p, i) => {
-      p.stop();
+    sources.forEach((s) => {
+      s.stop();
     });
   }
 
   if (isPlaying) {
     guitarPlay();
     mandoPlay();
+
+    gains?.forEach((node, i) => {
+      node.gain.setValueAtTime(
+        selectedPass === i ? 1 : 0,
+        audioContext.currentTime
+      );
+    });
     if (position === 0 && passes[0] && !recordingArmed) {
-      passes.forEach((p, i) => {
-        p.volume(selectedPass === i ? 1 : 0).play();
+      passes2.forEach((buffer, i) => {
+        const gainNode = audioContext.createGain();
+        const analyser = audioContext.createAnalyser();
+
+        gains[i] = gainNode;
+
+        sources[i] = audioContext.createBufferSource();
+        sources[i].buffer = buffer;
+        sources[i].connect(gainNode);
+
+        gainNode.connect(audioContext.destination);
+
+        gains[i].gain.setValueAtTime(
+          selectedPass === i ? 1 : 0,
+          audioContext.currentTime
+        );
+        sources[i].start();
+
+        // p.volume(selectedPass === i ? 1 : 0).play();
       });
     }
 
@@ -124,6 +150,7 @@ export function record() {
 }
 
 const passes = [];
+const passes2 = [];
 
 export function getPasses() {
   if (passes.length > 0) {
@@ -148,6 +175,23 @@ export function prepareToRecord() {
         const audioBlob = new Blob(audioChunks);
         const audioUrl = URL.createObjectURL(audioBlob);
         store.dispatch(pushPasses(audioUrl));
+        let fileReader = new FileReader();
+
+        fileReader.onloadend = () => {
+          let arrayBuffer = fileReader.result;
+          audioContext.decodeAudioData(arrayBuffer, (audioBuffer) => {
+            // const source = audioContext.createBufferSource();
+            // set the buffer in the AudioBufferSourceNode
+            // source.buffer = audioBuffer;
+            // connect the AudioBufferSourceNode to the
+            // destination so we can hear the sound
+            // source.connect(audioContext.destination);
+            // start the source playing
+            passes2.push(audioBuffer);
+          });
+        };
+
+        fileReader.readAsArrayBuffer(audioBlob);
 
         passes.push(new Howl({ src: [audioUrl], html5: true }));
 

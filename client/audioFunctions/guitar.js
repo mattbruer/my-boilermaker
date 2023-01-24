@@ -220,7 +220,7 @@ export function guitarPlay() {
             .volume(0.3 * volDec)
             .stereo(balance)
             .play();
-        }, (getExpectedTime() - Date.now()) / 2);
+        }, (getExpectedTime() - (getExpectedTime() - 60000 / tempo)) / 2);
       //strum
       playroll[pos].forEach((note, i) => {
         setTimeout(() => {

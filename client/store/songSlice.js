@@ -16,7 +16,6 @@ import {
 //i made these thunks because of side effects...??
 let passes;
 export const playSong = createAsyncThunk('song/playSong', (_, thunkAPI) => {
-  passes = getPasses();
   initExpectedTime();
 
   thunkAPI.dispatch(togglePlay(true));
@@ -27,8 +26,8 @@ export const advancePosition = createAsyncThunk(
   'song/advancePosition',
   (_, thunkAPI) => {
     const { getState, dispatch } = thunkAPI;
-
     dispatch(positionAdvanced());
+
     const { position, recordingArmed } = getState().songs;
 
     if (recordingArmed && position === 0) {
@@ -110,7 +109,7 @@ const initialState = {
   isRecording: false,
   recordingArmed: false,
   passes: [],
-  selectedPass: null,
+  selectedPass: [],
 };
 
 const songSlice = createSlice({
@@ -134,10 +133,10 @@ const songSlice = createSlice({
     },
     selectPass: (state, action) => {
       const passes = getPasses();
-      state.selectedPass = action.payload;
-      passes.forEach((p, i) => {
-        p.volume(state.selectedPass === i ? 1 : 0);
-      });
+      state.selectedPass.push(action.payload);
+      // passes.forEach((p, i) => {
+      //   p.volume(state.selectedPass === i ? 1 : 0);
+      // });
     },
     toggleEditMode: (state, action) => {
       state.editMode = action.payload;

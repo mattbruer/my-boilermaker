@@ -15,7 +15,7 @@ import { buildMandoPlayroll } from './mando';
 let flattenedSong;
 const AudioContext = window.AudioContext || window.webkitAudioContext;
 export const audioContext = new AudioContext({
-  sampleRate: 44100,
+  sampleRate: 96000,
   latencyHint: 0,
 });
 
@@ -85,9 +85,13 @@ const gains = [];
 const sources = [];
 const analyserArr = [];
 
+let prev;
 export function play() {
   const now = Date.now();
+  let tnow = audioContext.currentTime * 1000;
+  console.log(tnow - prev);
 
+  prev = tnow;
   const { isPlaying, position, selectedPass, recordingArmed } =
     store.getState().songs;
 
@@ -100,10 +104,10 @@ export function play() {
   if (isPlaying) {
     guitarPlay();
     mandoPlay();
-
+    store.dispatch(advancePosition());
     gains?.forEach((node, i) => {
       node.gain.setValueAtTime(
-        selectedPass === i ? 1 : 0,
+        selectedPass.includes(i) ? 1 : 0,
         audioContext.currentTime
       );
     });
@@ -121,7 +125,7 @@ export function play() {
         gainNode.connect(audioContext.destination);
 
         gains[i].gain.setValueAtTime(
-          selectedPass === i ? 1 : 0,
+          selectedPass.includes(i) ? 1 : 0,
           audioContext.currentTime
         );
         sources[i].start();
@@ -130,11 +134,10 @@ export function play() {
       });
     }
 
-    store.dispatch(advancePosition());
-
     setTimeout(() => {
       isPlaying && play();
-    }, expectedTime - now);
+    }, expectedTime - Date.now());
+
     prevTime = expectedTime;
     expectedTime += 60000 / store.getState().songs.tempo;
   }
@@ -187,6 +190,7 @@ export function prepareToRecord() {
             // destination so we can hear the sound
             // source.connect(audioContext.destination);
             // start the source playing
+
             passes2.push(audioBuffer);
           });
         };

@@ -60,7 +60,9 @@ const Song = () => {
                     <button
                       style={{
                         width: '40px',
-                        backgroundColor: selectedPass === i ? 'red' : 'white',
+                        backgroundColor: selectedPass.includes(i)
+                          ? 'red'
+                          : 'white',
                         height: '40px',
                         borderRadius: '3px',
                         margin: '2px',

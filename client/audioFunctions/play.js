@@ -37,6 +37,7 @@ async function monitor() {
 function checkHeadphones() {
   navigator.mediaDevices.enumerateDevices().then((devices) => {
     // Check the connected devices
+    console.log(devices);
     const headphones = devices.find((d) => d.label.includes('Headphones'));
     if (headphones) {
       monitor();

@@ -15,8 +15,10 @@ const AuthForm = (props) => {
   const { name, displayName, handleSubmit, error } = props;
   const auth = useSelector((state) => state.auth);
 
+  console.log(!!auth.id);
   useEffect(() => {
-    auth.id && navigate('/home');
+    !!auth.id && navigate('/home');
+    !!auth.id && console.log('login happened');
   }, [auth]);
 
   return (

@@ -9,25 +9,30 @@ import Song from './components/Song/Song';
 
 const Routes = () => {
   const dispatch = useDispatch();
+  const auth = useSelector((state) => state.auth);
+  const isLoggedIn = !!auth.id;
 
   useEffect(() => {
     dispatch(me());
   }, []);
 
-  const { auth } = useSelector((state) => state);
-
-  const isLoggedIn = !!auth.id;
-
   return (
     <AppRoutes>
       <>
-        <Route path="/hi" element={<Hi />} />
-        <Route path="/home" element={<Home />} />
-        <Route path="/song/:songId" element={<Song />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/signup" element={<Signup />} />
-        <Route path="/" element={<Login />} />
-        <Route path="*" element={<Navigate to="/" replace />} />
+        {isLoggedIn ? (
+          <>
+            <Route path="/home" element={<Home />} />
+            <Route path="/song/:songId" element={<Song />} />
+            <Route path="*" element={<Navigate to="/home" replace />} />
+          </>
+        ) : (
+          <>
+            <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<Signup />} />
+            <Route path="/" element={<Login />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </>
+        )}
       </>
     </AppRoutes>
   );

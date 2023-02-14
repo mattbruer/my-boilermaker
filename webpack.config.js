@@ -1,8 +1,10 @@
+const path = require("path");
 module.exports = {
   entry: ["./client/index.js"],
   output: {
-    path: __dirname,
+    path: path.join(__dirname),
     filename: "bundle.js",
+    publicPath: "/public",
   },
   devtool: "source-map",
   module: {
